@@ -1,0 +1,38 @@
+Best match: HTSeq 1.99.2
+Processing HTSeq-1.99.2-cp38-cp38-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_12_x86_64.manylinux2010_x86_64.whl
+Installing HTSeq-1.99.2-cp38-cp38-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_12_x86_64.manylinux2010_x86_64.whl to /usr/local/lib/python3.8/site-packages
+Adding HTSeq 1.99.2 to easy-install.pth file
+Installing htseq-count-barcodes script to /usr/local/bin
+Installing htseq-qa script to /usr/local/bin
+Installing htseq-count script to /usr/local/bin
+
+Installed /usr/local/lib/python3.8/site-packages/HTSeq-1.99.2-py3.8-linux-x86_64.egg
+Searching for pysam
+Reading https://pypi.org/simple/pysam/
+Downloading https://files.pythonhosted.org/packages/41/0f/4ffdea619a8898c936f6f1b909759486167976d761fc265f931119f0da1e/pysam-0.18.0-cp38-cp38-manylinux_2_12_x86_64.manylinux2010_x86_64.whl#sha256=7f6a4ec58ad7995b791a71bf35f673ea794e734c587ea7329fca5cce9c53a7af
+Best match: pysam 0.18.0
+Processing pysam-0.18.0-cp38-cp38-manylinux_2_12_x86_64.manylinux2010_x86_64.whl
+Installing pysam-0.18.0-cp38-cp38-manylinux_2_12_x86_64.manylinux2010_x86_64.whl to /usr/local/lib/python3.8/site-packages
+Adding pysam 0.18.0 to easy-install.pth file
+
+Installed /usr/local/lib/python3.8/site-packages/pysam-0.18.0-py3.8-linux-x86_64.egg
+Searching for numpy
+Reading https://pypi.org/simple/numpy/
+Downloading https://files.pythonhosted.org/packages/47/d3/9d7a1dec5b56c5c5c36df93e10ebb407b0836cd74f5c916f3c019b48f08e/numpy-1.22.0rc3-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl#sha256=2313aa9b9684b36b0bf07e44432d025e0803518286a1ecae5f0ea947b46008df
+Best match: numpy 1.22.0rc3
+Processing numpy-1.22.0rc3-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
+Installing numpy-1.22.0rc3-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl to /usr/local/lib/python3.8/site-packages
+Adding numpy 1.22.0rc3 to easy-install.pth file
+Installing f2py script to /usr/local/bin
+Installing f2py3 script to /usr/local/bin
+Installing f2py3.8 script to /usr/local/bin
+
+Installed /usr/local/lib/python3.8/site-packages/numpy-1.22.0rc3-py3.8-linux-x86_64.egg
+Finished processing dependencies for DCC==0.5.0
+root@03eab8484016:~/DCC-0.5.0# python3
+Python 3.8.12 (default, Dec 21 2021, 10:45:09) 
+[GCC 10.2.1 20210110] on linux
+Type "help", "copyright", "credits" or "license" for more information.
+>>> import DCC
+>>> 
+

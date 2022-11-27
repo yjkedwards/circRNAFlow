@@ -1,0 +1,102 @@
+root@0660c3f4a4b8:~/Python-3.10.1# history 
+    1  cd /root/
+    2  wget https://www.python.org/ftp/python/3.10.1/Python-3.10.1.tar.xz
+    3  uncompress Python-3.10.1.tar.xz 
+    4  ls -alht
+    5  file Python-3.10.1.tar.xz 
+    6  ls -alht
+    7  tar -xvf Python-3.10.1.tar.xz 
+    8  xz
+    9  apt-get install xz-utils  
+   10  tar -xvf Python-3.10.1.tar.xz 
+   11  cd  Python-3.10.1
+   12  ls -alht
+   13  ./configure 
+   14  apt-get install -y libffi-dev
+   15  reset;clear;
+   16  ./configure 
+   17  make clean
+   18  make
+   19  apt-get install -y libreadline-dev
+   20  make clean
+   21  reset;clear;
+   22  make -j
+   23  cd ..
+   24  rm -rf Python-3.10.1
+   25  tar -xvf Python-3.10.1.tar.xz 
+   26  cd Python-3.10.1
+   27  ./configure 
+   28  make -j
+   29  apt-get install libssl-dev
+   30  cd ..
+   31  tar -xvf Python-3.10.1.tar.xz 
+   32  cd Python-3.10.1
+   33  ./configure  
+   34  make -j
+   35  history 
+   36  rm -rf Python-3.10.1
+   37  wget https://www.openssl.org/source/openssl-1.1.1m.tar.gz
+   38  tar -xvzf openssl-1.1.1m.tar.gz 
+   39  cd openssl-1.1.1m
+   40  ll
+   41  ./config 
+   42  ll
+   43  ./Configure 
+   44  ./config
+   45  cd ..
+   46  rm -rf openssl-1.1.1m
+   47  tar -xvzf openssl-1.1.1m.tar.gz 
+   48  cd openssl-1.1.1m
+   49  ls -alht
+   50  ./config 
+   51  ls -alht
+   52  make -j
+   53  make install
+   54  cd 
+   55  cd ..
+   56  ll
+   57  cd /root/
+   58  ls -alht
+   59  which openssl
+   60  openssl --version
+   61  ldconfig --help
+   62  ldconfig
+   63  openssl --version
+   64  openssl -version
+   65  openssl
+   66  openssl -v
+   67  openssl -version
+   68  openssl --version
+   69  cd /root/
+   70  ls -alht
+   71  tar -xvzf Python-3.10.1.tar.xz 
+   72  tar -xvf Python-3.10.1.tar.xz 
+   73  cd Python-3.10.1
+   74  ./configure 
+   75  make -j
+   76  cd ..
+   77  rm -rf Python-3.10.1
+   78  sqlite3
+   79  apt-get install -y sqlite
+   80  tar -xvf Python-3.10.1.tar.xz 
+   81  cd Python-3.10.1
+   82  ./configure 
+   83  make -j
+   84  apt-get install -y sqlite-dev
+   85  apt-get install -y sqlite3-dev
+   86  ls -alht /usr/include/sq*
+   87  ls -alht /usr/local/include/sq*
+   88  apt-get install -y sqlite3-dev
+   89  apt-get install -y libsqlite3-dev
+   90  cd ..
+   91  cd /root/
+   92  ls -alht
+   93  rm -rf Python-3.10.1
+   94  tar -xvf Python-3.10.1.tar.xz 
+   95  cd Python-3.10.1
+   96  ./configure 
+   97  make -j
+   98  reset;clear;
+   99  history 
+root@0660c3f4a4b8:~/Python-3.10.1# 
+
