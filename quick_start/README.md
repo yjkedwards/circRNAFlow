@@ -1,6 +1,6 @@
 # CircRNAFlow Quick Start
 
-This file offers some instructions for a "quick start" with CircRNAFlow.  It assumes that you are running Linux, with *docker* installed, as well as the latest version of nextflow.  It also assume that the user has sufficient permission to run docker commands as well.
+This file offers some instructions for a "quick start" with CircRNAFlow to run it *locally*.  It assumes that you are running Linux, with *docker* installed, as well as the latest version of nextflow.  It also assume that the user has sufficient permission to run docker commands as well.
 
 Follow these steps to run a demonstration analysis.
 
