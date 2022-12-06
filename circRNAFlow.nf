@@ -673,6 +673,8 @@ process run_cluster_profiler {
 	input:
 		file '*' from plotting_results
 		file 'kegg_db' from Channel.value(file(params.kegg_db))
+	output:
+		file 'cp_outputs.zip' into cp_outputs
 
 shell:
 '''
@@ -759,7 +761,7 @@ for index, group_row in filt_groups.iterrows():
         new_df=pd.concat([new_df.copy(deep=True),new_row_df.copy(deep=True)])
         new_df_all=pd.concat([new_df_all.copy(deep=True),temp_df.copy(deep=True)])
 
-#write to  cp_input.tsv
+#write to  cp_input.tsv (cluster_profiler input)
 new_df.to_csv('cp_input.tsv', sep='\t',index=False)
 
 #add the other output file
@@ -770,6 +772,9 @@ python3 -c "${EXTRACT_ROWS_PY_SCRIPT}" ;
 
 #run cluster profiler
 KEGG_ORGANISM="!{params.kegg_cp_organism_str}"  KEGG_CP_FILE=kegg_db  CPSSEP=$'\\t'  Rscript /usr/local/bin/cp_script.R  cp_input.tsv Log2Ratio 0 Gene sig_p
+
+#package the outputs
+zip cp_outputs.zip  cp_input.tsv full_annotated_cp_input.tsv  cp_input.tsv.sig.*
 
 '''
 
