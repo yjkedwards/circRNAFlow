@@ -1,6 +1,6 @@
 # CircRNAFlow
 
-A pipeline for Circular RNA analysis
+A pipeline for Circular RNA analysis associated with this paper : [Salinas EA, Macauley V, Keeling KM, Edwards YJK. Discovery of dysregulated circular RNAs in whole blood transcriptomes from cystic fibrosis patients - implication of a role for cellular senescence in cystic fibrosis. J Cyst Fibros. 2023 May 2:S1569-1993(23)00127-3. doi: 10.1016/j.jcf.2023.04.021. Epub ahead of print. PMID: 37142522.](https://www.sciencedirect.com/science/article/abs/pii/S1569199323001273)
 
  * based on DCC, supported by STAR, bowtie, CircTest, ClusterProfiler, additional scripts, and of course Nextflow
  * requires .fastq.gz files to follow a naming convention
