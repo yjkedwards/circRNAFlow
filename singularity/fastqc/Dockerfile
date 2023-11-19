@@ -13,7 +13,7 @@ RUN apt-get install -y libreadline-dev
 RUN apt-get install -y sqlite
 RUN apt-get install -y libsqlite3-dev
 RUN cd /root && wget  --no-check-certificate  https://www.openssl.org/source/openssl-1.1.1m.tar.gz && tar -xvzf openssl-1.1.1m.tar.gz  && cd openssl-1.1.1m && ./config && make && make install && ldconfig
-RUN cd /root && wget https://www.python.org/ftp/python/3.10.1/Python-3.10.1.tar.xz && tar -xvf Python-3.10.1.tar.xz  &&  cd Python-3.10.1 && ./configure && make && make install
+RUN cd /root && wget  --no-check-certificate  https://www.python.org/ftp/python/3.10.1/Python-3.10.1.tar.xz && tar -xvf Python-3.10.1.tar.xz  &&  cd Python-3.10.1 && ./configure && make && make install
 
 
 
