@@ -2,7 +2,8 @@ FROM r-base:4.2.1
 #FROM jupyter/datascience-notebook:r-4.2
 USER root
 RUN apt-get update
-RUN apt-get install -y libfreetype-dev libfreetype6 libfreetype6-dev
+RUN apt-get install -y libfreetype-dev
+RUN apt-get install -y libfreetype6 
 RUN apt-get install -y libz-dev
 RUN apt-get install -y libxml2-dev
 RUN apt-get install -y libglpk-dev
@@ -24,7 +25,7 @@ RUN apt-get install -y libfontconfig1-dev
 RUN cd /root/ && Rscript install_cp.R
 RUN apt-get install -y python3-dev
 RUN apt-get install -y pip
-RUN python3 -m pip install pandas
+RUN python3 -m pip   install pandas  --break-system-packages
 COPY install_cp.4.4.R /root/
 RUN cd /root && Rscript install_cp.4.4.R
 COPY cp_script.R /usr/local/bin/
