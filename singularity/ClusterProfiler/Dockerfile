@@ -30,3 +30,4 @@ COPY install_cp.4.4.R /root/
 RUN cd /root && Rscript install_cp.4.4.R
 COPY cp_script.R /usr/local/bin/
 CMD /bin/bash
+RUN apt-get install -y procps
