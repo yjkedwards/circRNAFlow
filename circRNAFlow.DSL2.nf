@@ -23,6 +23,8 @@ process runFlexBar {
 input:
 	path '*'
 	path 'adapter_fasta'
+output:
+    path 'flexbar_output/*.fastq.gz'
 
 shell:
 '''
@@ -54,16 +56,70 @@ done ;
 }
 
 
-workflow circrnaflow {
+process mapAgainstRRNA {
+
+
+
+input:
+	file '*' 
+	file '*' 
+
+
+
+shell:
+'''
+ls -alht 
+#RRNA DB NAME
+RRNA_DB=`find *.rev.1.bt2|sed -r "s/\\.rev.1.bt2//g"`;
+echo "Got RRNA_DB ${RRNA_DB}" ; 
+# align reads against the rRNA reference in paired end fashion
+set -x
+bowtie2 -x ${RRNA_DB} -1 `find *_R1_*.fastq.gz` -2 `find *_R2_*.fastq.gz` --no-unal --threads 8 --un-conc-gz adapter_removed_rRNA_filtered.fastq.gz 1>/dev/null 2>/dev/null
+
+#move output to a new dir and rename to input (maintain short filenames)
+mkdir -v adapter_removed_rRNA_filtered
+mv -vi adapter_removed_rRNA_filtered.fastq.* ./adapter_removed_rRNA_filtered
+cd adapter_removed_rRNA_filtered
+for RN in `seq 1 2`; do
+	IN_READ=`find ../*_R${RN}_* | xargs basename`;
+	echo "IN_READ IS ${IN_READ}" ; 
+	OUT_READ=`find *.${RN}.gz`; 
+	echo "OUT_READ IS ${OUT_READ}" ; 
+	#rename output file name to same as input
+	mv -v ${OUT_READ} ${IN_READ} ; 	
+done ;
+
+
+
+
+'''
+
+
+}
+
+
+
+
+workflow {
 
 	//run FASTQC solo
 	runFQC(Channel.fromPath(params.fqgzglob))
 
-	//main pipeline
+	//main pipeline:
+
+	//1) after running FQC, pair up the FQs an then run them through flexbar for adapter removal.
 	paired_fqgz=Channel.fromPath(params.fqgzglob).map { [  new File(""+it).getName().replace('.fastq.gz', '').replace('_R1_','_RX_').replace('_R2_','_RX_') , it ] }
 		.groupTuple(by: 0)
 		.map { it[1] }
 	adapter_fasta=Channel.value(file(params.adapter_fasta))
-	runFlexBar(paired_fqgz,adapter_fasta)
+	flexed=runFlexBar(paired_fqgz,adapter_fasta)
+
+	//after running them through flexbar, use 
+	// 2) BWA to map against an rRNA database for rRNA filtering
+	rrRNACleaned=mapAgainstRRNA(flexed,
+		channel.fromPath(params.rrna_glob).collect())
+
+
+
 
 }
