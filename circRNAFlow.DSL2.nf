@@ -63,6 +63,9 @@ process mapAgainstRRNA {
 input:
 	file '*' 
 	file '*' 
+output:
+	file 'adapter_removed_rRNA_filtered/*'
+
 
 
 
@@ -99,6 +102,171 @@ done ;
 
 
 
+process star_align_pair {
+
+
+
+input:
+	path '*' 
+	path 'star_db/*'
+	path 'gtf_file'
+output:
+	tuple file('source_pair.txt'),file('*.pair.chimeric.out.junction'),file('*.pair.SJ.out.tab'),file('*.pair.Aligned.sortedByCoord.out.bam') 
+
+shell:
+'''
+ls -alht
+find .
+READ_1=`find *_R1_*gz`
+READ_2=`find *_R2_*gz`
+STAR --runThreadN 8 \
+	--genomeDir ${PWD}/star_db  \
+	--outSAMtype BAM SortedByCoordinate \
+	--readFilesIn ${READ_1} ${READ_2} \
+	--readFilesCommand zcat \
+	--outFileNamePrefix ${PWD}/paired_output/ \
+	--outReadsUnmapped Fastx \
+	--outSAMattributes NH   HI   AS   nM   NM   MD   jM   jI   XS \
+	--outSJfilterOverhangMin 15 15 15 15 \
+	--alignSJoverhangMin 15 \
+	--sjdbGTFfile !{gtf_file} \
+	--alignSJDBoverhangMin 15 \
+	--outFilterMultimapNmax 20 \
+	--outFilterScoreMin 1 \
+	--outFilterMatchNmin 1 \
+	--outFilterMismatchNmax 2 \
+	--chimSegmentMin 15 \
+	--chimScoreMin 15 \
+	--chimScoreSeparation 10 \
+	--chimJunctionOverhangMin 15 1>star.out 2>star.err
+mv -vi paired_output/Chimeric.out.junction paired_output/pair.chimeric.out.junction && touch paired_output/pair.chimeric.out.junction
+mv -vi paired_output/SJ.out.tab paired_output/pair.SJ.out.tab && touch  paired_output/pair.SJ.out.tab
+mv -vi paired_output/Aligned.sortedByCoord.out.bam paired_output/pair.Aligned.sortedByCoord.out.bam  && touch paired_output/pair.Aligned.sortedByCoord.out.bam
+mv -vi paired_output/pair.* .
+/bin/echo -ne "${READ_1}" > source_pair.txt
+for F in `find pair.*`; do
+	mv -v ${F} ${READ_1}.${F} ;
+done ;
+chmod -vR 777 paired_output
+sleep 5
+'''
+
+}
+
+
+
+
+process star_align_first {
+
+
+input:
+	path '*' 
+	path 'star_db/*'
+	path 'gtf_file'
+output:
+	tuple file('source_pair.txt'),file('*.first.chimeric.out.junction'),file('*.first.SJ.out.tab'),file('*.first.Aligned.sortedByCoord.out.bam') 
+
+shell:
+'''
+ls -alht
+find .
+READ_1=`find *_R1_*gz`
+READ_2=`find *_R2_*gz`
+STAR --runThreadN 8 \
+	--genomeDir ${PWD}/star_db  \
+	--outSAMtype BAM SortedByCoordinate \
+	--readFilesIn ${READ_1} \
+	--readFilesCommand zcat \
+	--outFileNamePrefix ${PWD}/first_output/ \
+	--outReadsUnmapped Fastx \
+	--outSAMattributes NH   HI   AS   nM   NM   MD   jM   jI   XS \
+	--outSJfilterOverhangMin 15 15 15 15 \
+	--alignSJoverhangMin 15 \
+	--sjdbGTFfile !{gtf_file} \
+	--alignSJDBoverhangMin 15 \
+	--outFilterMultimapNmax 20 \
+	--outFilterScoreMin 1 \
+	--outFilterMatchNmin 1 \
+	--outFilterMismatchNmax 2 \
+	--chimSegmentMin 15 \
+	--chimScoreMin 15 \
+	--chimScoreSeparation 10 \
+	--chimJunctionOverhangMin 15 1>star.out 2>star.err
+mv -vi first_output/Chimeric.out.junction first_output/first.chimeric.out.junction && touch first_output/first.chimeric.out.junction
+mv -vi first_output/SJ.out.tab first_output/first.SJ.out.tab && touch first_output/first.SJ.out.tab
+mv -vi first_output/Aligned.sortedByCoord.out.bam first_output/first.Aligned.sortedByCoord.out.bam && touch first_output/first.Aligned.sortedByCoord.out.bam
+mv -vi first_output/first.* .
+/bin/echo -ne "${READ_1}" > source_pair.txt
+for F in `find first.*`; do
+	mv -v ${F} ${READ_1}.${F} ; 
+done ;
+chmod -vR 777 first_output
+sleep 5
+'''
+
+}
+
+
+
+process star_align_second {
+
+
+
+input:
+	path '*' 
+	path 'star_db/*'
+	path 'gtf_file'
+output:
+	tuple file('source_pair.txt'),file('*.second.chimeric.out.junction'),file('*.second.SJ.out.tab'),file('*.second.Aligned.sortedByCoord.out.bam') 
+
+
+
+shell:
+'''
+ls -alht
+find .
+READ_1=`find *_R1_*gz`
+READ_2=`find *_R2_*gz`
+STAR --runThreadN 8 \
+	--genomeDir ${PWD}/star_db  \
+	--outSAMtype BAM SortedByCoordinate \
+	--readFilesIn ${READ_2} \
+	--readFilesCommand zcat \
+	--outFileNamePrefix ${PWD}/second_output/ \
+	--outReadsUnmapped Fastx \
+	--outSAMattributes NH   HI   AS   nM   NM   MD   jM   jI   XS \
+	--outSJfilterOverhangMin 15 15 15 15 \
+	--alignSJoverhangMin 15 \
+	--sjdbGTFfile !{gtf_file} \
+	--alignSJDBoverhangMin 15 \
+	--outFilterMultimapNmax 20 \
+	--outFilterScoreMin 1 \
+	--outFilterMatchNmin 1 \
+	--outFilterMismatchNmax 2 \
+	--chimSegmentMin 15 \
+	--chimScoreMin 15 \
+	--chimScoreSeparation 10 \
+	--chimJunctionOverhangMin 15 1>star.out 2>star.err
+mv -vi second_output/Chimeric.out.junction second_output/second.chimeric.out.junction && touch second_output/second.chimeric.out.junction
+mv -vi second_output/SJ.out.tab second_output/second.SJ.out.tab && touch second_output/second.SJ.out.tab
+mv -vi second_output/Aligned.sortedByCoord.out.bam second_output/second.Aligned.sortedByCoord.out.bam && touch second_output/second.Aligned.sortedByCoord.out.bam
+mv -vi second_output/second.* .
+/bin/echo -ne "${READ_1}" > source_pair.txt
+for F in `find second.*`; do
+	mv -v ${F} ${READ_1}.${F} ; 
+done ;
+chmod -vR 777 second_output
+sleep 5
+'''
+
+}
+
+
+
+
+
+
+
 
 workflow {
 
@@ -119,6 +287,15 @@ workflow {
 	rrRNACleaned=mapAgainstRRNA(flexed,
 		channel.fromPath(params.rrna_glob).collect())
 
+	//3) map the filtered data using STAR in 3 modes:
+		star_ref=channel.fromPath(params.stardb_glob).collect()
+		star_gtf=channel.fromPath(params.gtf_file).collect()
+	// a) as a pair
+	star_align_pair(rrRNACleaned,star_ref,star_gtf)
+	// b) just read 1
+	star_align_first(rrRNACleaned,star_ref,star_gtf)
+	// c) just read 2
+    star_align_second(rrRNACleaned,star_ref,star_gtf)
 
 
 
