@@ -17,4 +17,5 @@ NXF_VER=21.10.6 nextflow -C demo.config run ${PIPE_FILE} --cohort_comp_conf pipe
 	--repeat_file ref_data/human_repeats.gtf   \
 	--circatlas_bed ref_data/circatlas_human_bed_v2.0.txt \
 	--kegg_cp_organism_str hsa  \
-	--kegg_db ref_data/symbol_to_kegg_gid.HUMAN.csv 1>${NF_OUT} 2>${NF_ERR}
+	--kegg_db ref_data/symbol_to_kegg_gid.HUMAN.csv \
+	-with-report -with-trace 1>>${NF_OUT} 2>>${NF_ERR}
