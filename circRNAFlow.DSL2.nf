@@ -326,6 +326,221 @@ set +x
 
 
 
+process circtest {
+
+input:
+	file '*' 
+	file 'cohort_comp_conf'
+output:
+	file '*.circtest_results.zip'
+
+shell:
+'''
+ls -alht
+ls -alht /usr/local/bin/
+##############################
+#edit the files to have shorter names in the column headers; use the passed-in JSON file
+for DCCF in LinearCount CircRNACount ; do
+	python3 /usr/local/bin/name_edit.py !{cohort_comp_conf}  ${DCCF} s.${DCCF} ;
+done ;
+##############################
+#distribute the columns into desired cohorts using
+# an inline python3 script
+COHORT_TO_RUN=`cat input.1` ; 
+echo "COHORT_TO_RUN IS ${COHORT_TO_RUN}" ; 
+COHORT_DIST="""
+import os
+import csv
+import copy
+import shutil
+import json
+linear_file='s.LinearCount'
+circ_file='s.CircRNACount'
+coord_file='CircCoordinates'
+
+# read cohort/comparison data from JSON file
+cohort_comp_conf_json_file='!{cohort_comp_conf}'
+jreader=open(cohort_comp_conf_json_file)
+cohort_comp_conf=json.load(jreader)
+jreader.close()
+cohort_comps=cohort_comp_conf['cohort_comps']
+comp_names=cohort_comp_conf['comp_names']
+
+
+def writeToFile(s,f):
+    writer=open(f,'w')
+    writer.write(s.strip()+'\\n')
+    writer.close()
+for comp in cohort_comps:
+    if(not(comp=='${COHORT_TO_RUN}')):
+        continue
+    print(f'Processing for comparision {comp}')
+    common_keys=['Chr','Start','End']
+    os.makedirs(comp,exist_ok=True)
+    shutil.copyfile(coord_file,comp+'/'+coord_file)
+    tsv_files=[linear_file,circ_file]
+    out_files=[comp+'/'+t for t in tsv_files]
+    writeToFile(comp_names[comp][0],comp+'/G1.txt')
+    writeToFile(comp_names[comp][1],comp+'/G2.txt')
+    for file_pair in zip(tsv_files,out_files):
+        with open(file_pair[0], mode='r') as csv_file:
+            csv_reader = csv.DictReader(csv_file,delimiter='\\t')
+            wroteHeader=False
+            writer=open(file_pair[1],'w')
+            recs_written=0
+            for row in csv_reader:
+                    if(not(wroteHeader)):
+                        header=copy.deepcopy(common_keys)
+                        header.extend(cohort_comps[comp])
+                        wroteHeader=True
+                        writer.write('\\t'.join(header)+'\\n')
+                    row_keys_to_write=copy.deepcopy(common_keys)
+                    row_keys_to_write.extend(cohort_comps[comp])
+                    vals_to_write=[row[rk] for rk in row_keys_to_write]
+                    writer.write('\\t'.join(vals_to_write)+'\\n')
+                    recs_written=recs_written+1
+            writer.close()
+
+    #now write the counts to  analysis_col.txt
+    counts_dict=cohort_comp_conf['comparison_counts']
+    the_counts_this_comp=counts_dict[comp]
+    val_to_write=the_counts_this_comp+3
+    writer=open(comp+'/analysis_col.txt','w')
+    writer.write(str(val_to_write))
+    writer.close()    
+
+"""
+python3 -c "${COHORT_DIST}" ; 
+
+
+BASE_DIR="${PWD}" ; 
+for CT_DIR in `find */s.*|grep -Pi 'inear'|xargs -I {} dirname {}`; do
+	cd ${BASE_DIR}/${CT_DIR} ; 
+	DATA_IDX=`cat analysis_col.txt`; 
+	NAME_A=`cat G1.txt`;
+	NAME_B=`cat G2.txt`;
+	#start a job
+	set -x
+	circtest.cli.R s.CircRNACount s.LinearCount  CircCoordinates ${DATA_IDX} ${NAME_A} ${NAME_B}
+	set +x
+done ;
+#zip up the cohort results
+cd ${BASE_DIR} ;
+DG1=`find */G1.txt|xargs dirname`; 
+zip -r "${COHORT_TO_RUN}.circtest_results.zip" "${DG1}" ; 
+'''
+
+}
+
+
+
+process circtest_plain {
+
+input:
+	file '*'
+	file 'cohort_comp_conf'
+output:
+	file '*.circtest_results.zip'
+
+shell:
+'''
+ls -alht
+ls -alht /usr/local/bin/
+##############################
+#edit the files to have shorter names in the column headers; use the passed-in JSON file
+for DCCF in LinearCount CircRNACount ; do
+	python3 /usr/local/bin/name_edit.py !{cohort_comp_conf}  ${DCCF} s.${DCCF} ;
+done ;
+##############################
+#distribute the columns into desired cohorts using
+# an inline python3 script
+COHORT_TO_RUN=`cat input.1` ; 
+echo "COHORT_TO_RUN IS ${COHORT_TO_RUN}" ; 
+COHORT_DIST="""
+import os
+import csv
+import copy
+import shutil
+import json
+linear_file='s.LinearCount'
+circ_file='s.CircRNACount'
+coord_file='CircCoordinates'
+
+# read cohort/comparison data from JSON file
+cohort_comp_conf_json_file='!{cohort_comp_conf}'
+jreader=open(cohort_comp_conf_json_file)
+cohort_comp_conf=json.load(jreader)
+jreader.close()
+cohort_comps=cohort_comp_conf['cohort_comps']
+comp_names=cohort_comp_conf['comp_names']
+
+
+def writeToFile(s,f):
+    writer=open(f,'w')
+    writer.write(s.strip()+'\\n')
+    writer.close()
+for comp in cohort_comps:
+    if(not(comp=='${COHORT_TO_RUN}')):
+        continue
+    print(f'Processing for comparision {comp}')
+    common_keys=['Chr','Start','End']
+    os.makedirs(comp,exist_ok=True)
+    shutil.copyfile(coord_file,comp+'/'+coord_file)
+    tsv_files=[linear_file,circ_file]
+    out_files=[comp+'/'+t for t in tsv_files]
+    writeToFile(comp_names[comp][0],comp+'/G1.txt')
+    writeToFile(comp_names[comp][1],comp+'/G2.txt')
+    for file_pair in zip(tsv_files,out_files):
+        with open(file_pair[0], mode='r') as csv_file:
+            csv_reader = csv.DictReader(csv_file,delimiter='\\t')
+            wroteHeader=False
+            writer=open(file_pair[1],'w')
+            recs_written=0
+            for row in csv_reader:
+                    if(not(wroteHeader)):
+                        header=copy.deepcopy(common_keys)
+                        header.extend(cohort_comps[comp])
+                        wroteHeader=True
+                        writer.write('\\t'.join(header)+'\\n')
+                    row_keys_to_write=copy.deepcopy(common_keys)
+                    row_keys_to_write.extend(cohort_comps[comp])
+                    vals_to_write=[row[rk] for rk in row_keys_to_write]
+                    writer.write('\\t'.join(vals_to_write)+'\\n')
+                    recs_written=recs_written+1
+            writer.close()
+
+    #now write the counts to  analysis_col.txt
+    counts_dict=cohort_comp_conf['comparison_counts']
+    the_counts_this_comp=counts_dict[comp]
+    val_to_write=the_counts_this_comp+3
+    writer=open(comp+'/analysis_col.txt','w')
+    writer.write(str(val_to_write))
+    writer.close()    
+
+"""
+python3 -c "${COHORT_DIST}" ; 
+
+
+BASE_DIR="${PWD}" ; 
+for CT_DIR in `find */s.*|grep -Pi 'inear'|xargs -I {} dirname {}`; do
+	cd ${BASE_DIR}/${CT_DIR} ; 
+	DATA_IDX=`cat analysis_col.txt`; 
+	NAME_A=`cat G1.txt`;
+	NAME_B=`cat G2.txt`;
+	#start a job
+	set -x
+	circtest.cli.PLAIN.R s.CircRNACount s.LinearCount  CircCoordinates ${DATA_IDX} ${NAME_A} ${NAME_B}
+	set +x
+done ;
+#zip up the cohort results
+cd ${BASE_DIR} ;
+DG1=`find */G1.txt|xargs dirname`; 
+zip -r "${COHORT_TO_RUN}.circtest_results.zip" "${DG1}" ; 
+'''
+
+}
+
+
 
 
 
@@ -358,7 +573,7 @@ workflow {
 	// c) just read 2
     star_second_tuple=star_align_second(rrRNACleaned,star_ref,star_gtf)
 
-	//combine the star results
+	//combine the star results and merge with FQ files and input to DCC
 	all_star_results=star_pair_tuple.mix(star_first_tuple)
 		.mix(star_second_tuple)
 		.map { [new File(""+it[0]).text , it[1],it[2],it[3] ] }
@@ -366,18 +581,28 @@ workflow {
 		.combine(all_star_results)
 		.filter { it[0].startsWith(it[3]) }
 		.groupTuple()
-		// pair name, R1 , R2, chimeric junction (3) , SJ.out(3) , Aligned.sortedByCoord.out.bam (3)
+		// pair name, R1 , R2, chimeric junction (3 per sample) , SJ.out(3 per sample) , Aligned.sortedByCoord.out.bam (3 per sample)
 		.map{ [ it[0],it[1][0],it[2][0] , it[4][0],it[4][1],it[4][2] , it[5][0],it[5][1],it[5][2] , it[6][0],it[6][1],it[6][2]    ] }
 		.collect()
-
-
-	DCC_step(
+	circtest_staging=DCC_step(
 		DCC_input,
 		star_gtf,
 		channel.fromPath(params.fa_ref_file),
 		channel.fromPath(params.repeat_file)
 	)
 
+	//prepare for circtest
+	comp_channel=Channel
+    	.fromPath(params.comp_list)
+    	.splitText()
+	comp_circtest_channel_for_split=comp_channel.combine(circtest_staging)
+	//result=comp_circtest_channel_for_split.multiMap { it ->
+    //    comp_circtest_channel: it
+    //    comp_circtest_channel_plain: it
+    //}
+    circtest(comp_circtest_channel_for_split,channel.fromPath(params.cohort_comp_conf))
+	circtest_plain(comp_circtest_channel_for_split,channel.fromPath(params.cohort_comp_conf))
+    
 
 
 }
