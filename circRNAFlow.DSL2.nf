@@ -5,8 +5,11 @@ nextflow.enable.dsl=2
 
 process runFQC {
 
-  input:
-  path FQGZ
+	input:
+		path FQGZ
+	output:
+		path '*.zip' 
+
 
 shell:
 '''
