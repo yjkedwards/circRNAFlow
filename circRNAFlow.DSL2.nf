@@ -542,6 +542,85 @@ zip -r "${COHORT_TO_RUN}.circtest_results.zip" "${DG1}" ;
 
 
 
+process circtest_plotting {
+
+
+input:
+	file '*'
+	file 'circatlas_bed.txt'
+	file 'cohort_comp_conf'
+	
+
+output:
+	file '*.plotting_results.zip'
+
+shell:
+'''
+echo "Started at";
+date
+#unzip the file
+unzip `find *.zip` ;
+#EXTRACT COHORTNAME FROM ZIP
+COHORT_NAME=`find *.zip | grep -Po '^[^\\.]+\\.'|tr -d "."`;
+echo "From zip file, got cohort name ${COHORT_NAME}" ; 
+#set up the output area
+PLOTTING_DIR="${COHORT_NAME}_plottting" ;
+mkdir -v ${PLOTTING_DIR}
+#define the circatlas bed file
+CA_BED="circatlas_bed.txt" ;
+#run plotting
+python3 /usr/local/bin/ct_aug.py !{params.plot_cutoff ? "-PVC "+params.plot_cutoff : ""}  ${COHORT_NAME} ${CA_BED} ${PLOTTING_DIR}/${COHORT_NAME}.merged.tsv ${PLOTTING_DIR} !{cohort_comp_conf} ; 
+#zip up results of plotting
+zip -r ${COHORT_NAME}.plotting_results.zip ${PLOTTING_DIR}
+echo "Finished at";
+date
+'''
+
+}
+
+
+
+
+
+
+process circtest_plain_plotting {
+
+
+input:
+	file '*' 
+	file 'circatlas_bed.txt' 
+	file 'cohort_comp_conf' 
+	
+
+output:
+	file '*.plotting_results.zip'
+
+shell:
+'''
+echo "Started at";
+date
+#unzip the file
+unzip `find *.zip` ;
+#EXTRACT COHORTNAME FROM ZIP
+COHORT_NAME=`find *.zip | grep -Po '^[^\\.]+\\.'|tr -d "."`;
+echo "From zip file, got cohort name ${COHORT_NAME}" ; 
+#set up the output area
+PLOTTING_DIR="${COHORT_NAME}_plottting" ;
+mkdir -v ${PLOTTING_DIR}
+#define the circatlas bed file
+CA_BED="circatlas_bed.txt" ;
+#run plotting
+python3 /usr/local/bin/ct_aug.py !{params.plot_cutoff ? "-PVC "+params.plot_cutoff : ""}  ${COHORT_NAME} ${CA_BED} ${PLOTTING_DIR}/${COHORT_NAME}.merged.tsv ${PLOTTING_DIR} !{cohort_comp_conf} ; 
+#zip up results of plotting
+zip -r ${COHORT_NAME}.plotting_results.zip ${PLOTTING_DIR}
+echo "Finished at";
+date
+'''
+
+}
+
+
+
 
 
 workflow {
@@ -573,7 +652,7 @@ workflow {
 	// c) just read 2
     star_second_tuple=star_align_second(rrRNACleaned,star_ref,star_gtf)
 
-	//combine the star results and merge with FQ files and input to DCC
+	//4) combine the star results and merge with FQ files and input to DCC
 	all_star_results=star_pair_tuple.mix(star_first_tuple)
 		.mix(star_second_tuple)
 		.map { [new File(""+it[0]).text , it[1],it[2],it[3] ] }
@@ -591,18 +670,18 @@ workflow {
 		channel.fromPath(params.repeat_file)
 	)
 
-	//prepare for circtest
+	//5) prepare for circtest by combining DCC output with comparison configuration data
 	comp_channel=Channel
     	.fromPath(params.comp_list)
     	.splitText()
 	comp_circtest_channel_for_split=comp_channel.combine(circtest_staging)
-	//result=comp_circtest_channel_for_split.multiMap { it ->
-    //    comp_circtest_channel: it
-    //    comp_circtest_channel_plain: it
-    //}
-    circtest(comp_circtest_channel_for_split,channel.fromPath(params.cohort_comp_conf))
-	circtest_plain(comp_circtest_channel_for_split,channel.fromPath(params.cohort_comp_conf))
-    
+    raw_circtest_results_by_cohort=circtest(comp_circtest_channel_for_split,channel.fromPath(params.cohort_comp_conf))
+    raw_circtest_results_by_cohort_plain=circtest_plain(comp_circtest_channel_for_split,channel.fromPath(params.cohort_comp_conf))
+
+    //6) run plotting
+    plotting_results=circtest_plotting(raw_circtest_results_by_cohort,channel.fromPath(params.circatlas_bed),channel.fromPath(params.cohort_comp_conf))
+    plotting_results_plain=circtest_plain_plotting(raw_circtest_results_by_cohort_plain,channel.fromPath(params.circatlas_bed),channel.fromPath(params.cohort_comp_conf))
+
 
 
 }
