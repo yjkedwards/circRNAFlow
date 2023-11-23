@@ -267,6 +267,67 @@ sleep 5
 
 
 
+process DCC_step {
+
+input:
+	file '*'
+	file 'gtf_file'
+	file 'fa_file'
+	file 'repeat_file'
+output:
+	tuple file('LinearCount'), file('CircRNACount'), file('CircCoordinates')
+	
+shell:
+'''
+#memory report
+free -g
+#setup sample sheet and BAM list
+if [ -f samplesheet.txt ] ; then rm -v samplesheet.txt ; fi ;
+if [ -f bam_files ] ; then rm -v bam_files ; fi ;
+for INPUTF in `find input.*` ; do
+	SNAME=`cat ${INPUTF}`;
+	echo ${SNAME}.pair.chimeric.out.junction >> samplesheet.txt
+	echo ${SNAME}.pair.Aligned.sortedByCoord.out.bam >> bam_files
+	samtools index ${SNAME}.pair.Aligned.sortedByCoord.out.bam
+done ;
+#setup repeat file and GTF  and reffa
+REPEAT_FILE="!{repeat_file}"
+GTF_AN_FILE="!{gtf_file}"
+REFSEQ="!{fa_file}";
+samtools faidx ${REFSEQ} 
+#don't forget to include fai file here
+ls -alht ${REFSEQ}
+ls -alht ${REFSEQ}.fai
+ls -alht ${REPEAT_FILE} 
+#mate mappings
+if [ -f mate1.txt ] ; then rm -v mate1.txt ; fi ;
+if [ -f mate2.txt ] ; then rm -v mate2.txt ; fi ;
+for INPUTF in `find input.*` ; do
+	echo "Found input ${INPUTF}" ; 
+	SNAME=`cat ${INPUTF}`;
+	echo "${SNAME}.first.chimeric.out.junction"  >> mate1.txt
+	echo "${SNAME}.second.chimeric.out.junction"  >> mate2.txt
+done ;
+countthreshold=2
+replicatethreshold=3
+#countthreshold=2
+#replicatethreshold=1
+#  -Nr countthreshold replicatethreshold
+#  countthreshold replicatethreshold [default: 2,5]
+set -x
+wc -l mate1.txt mate2.txt bam_files  samplesheet.txt
+export CPUCOUNT=`cat /proc/cpuinfo |grep -Pic '^processor'`
+echo "Computed CPUCOUNT as ${CPUCOUNT}" ;
+DCC   --keep-temp     -T ${CPUCOUNT}   -D -G  -mt1 @mate1.txt -mt2 @mate2.txt -R ${REPEAT_FILE} -an ${GTF_AN_FILE} -Pi   -F -M -Nr ${countthreshold} ${replicatethreshold} -fg -B @bam_files  -A ${REFSEQ} @samplesheet.txt
+set +x
+'''
+}
+
+
+
+
+
+
 
 workflow {
 
@@ -291,11 +352,31 @@ workflow {
 		star_ref=channel.fromPath(params.stardb_glob).collect()
 		star_gtf=channel.fromPath(params.gtf_file).collect()
 	// a) as a pair
-	star_align_pair(rrRNACleaned,star_ref,star_gtf)
+	star_pair_tuple=star_align_pair(rrRNACleaned,star_ref,star_gtf)
 	// b) just read 1
-	star_align_first(rrRNACleaned,star_ref,star_gtf)
+	star_first_tuple=star_align_first(rrRNACleaned,star_ref,star_gtf)
 	// c) just read 2
-    star_align_second(rrRNACleaned,star_ref,star_gtf)
+    star_second_tuple=star_align_second(rrRNACleaned,star_ref,star_gtf)
+
+	//combine the star results
+	all_star_results=star_pair_tuple.mix(star_first_tuple)
+		.mix(star_second_tuple)
+		.map { [new File(""+it[0]).text , it[1],it[2],it[3] ] }
+	DCC_input=rrRNACleaned.map { [ (new File(""+it[0]).getName())+"" , it[0],it[1]] }
+		.combine(all_star_results)
+		.filter { it[0].startsWith(it[3]) }
+		.groupTuple()
+		// pair name, R1 , R2, chimeric junction (3) , SJ.out(3) , Aligned.sortedByCoord.out.bam (3)
+		.map{ [ it[0],it[1][0],it[2][0] , it[4][0],it[4][1],it[4][2] , it[5][0],it[5][1],it[5][2] , it[6][0],it[6][1],it[6][2]    ] }
+		.collect()
+
+
+	DCC_step(
+		DCC_input,
+		star_gtf,
+		channel.fromPath(params.fa_ref_file),
+		channel.fromPath(params.repeat_file)
+	)
 
 
 
