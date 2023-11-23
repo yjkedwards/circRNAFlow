@@ -621,6 +621,119 @@ date
 
 
 
+process run_cluster_profiler {
+
+	input:
+		file '*'
+		file 'kegg_db'
+	output:
+		file 'cp_outputs.zip'
+
+shell:
+'''
+
+#unzip the zip file
+ZIP_FILE=`find *.zip`; 
+unzip ${ZIP_FILE} ; 
+
+#get the merged TSV
+MERGED_TSV=`find */*.merged.tsv`; 
+echo "Found merged TSV ${MERGED_TSV}" ; 
+
+#extract the TSV data ; sig_DE data and filter.
+# Also, get uniq in the process ; use simple rules to address "conflicts" in
+# LOG2FC or sig_p
+EXTRACT_ROWS_PY_SCRIPT="""
+import pandas as pd
+main_df=pd.read_csv('${MERGED_TSV}',sep='\t')
+desired_cols=['Chr','Start','End','Gene','Strand','sig_p','Log2FC']
+
+####################################
+#filter by sig_p
+max_sig_p=0.1
+filt_df=main_df[main_df.apply(lambda row:row['sig_p']<max_sig_p,axis=1)]
+
+#get the groups to collapse into
+group_cols=['Chr','Start','End','Gene','Strand']
+filt_groups=filt_df.groupby(group_cols).size().reset_index().rename(columns={0:'count'})
+
+#perform the collapsing into new_df
+import json
+import numpy as np
+new_df=None
+new_df_all=None
+def match_row(given_row,group_row):
+    return all([group_row[gc]==given_row[gc] for gc in group_cols])
+    
+for index, group_row in filt_groups.iterrows():
+    
+    #first for the group, get all mathcing filtered
+    #filter_for_group=filt_df[filt_df.apply(lambda)
+    filt_rows_this_group=filt_df[filt_df.apply(lambda row:match_row(row,group_row),axis=1)]
+
+    
+    #to collapse it compute a new p-value ; use the mean
+    new_sig_p_val=filt_rows_this_group['sig_p'].mean()
+    
+    #also compute a collapsed/new Log2FC ; convert from 
+    # log2 to real, then average, then go back to log 2
+    log2FCs=[float(x) for x in filt_rows_this_group['Log2FC'].tolist()]
+    FCs=[2**l for l in log2FCs]
+    avgFC=sum(FCs)/len(FCs)
+    collapsedL2FC=np.log2(avgFC)
+
+    #compute collaped Log2Ratio
+    log2Ratios=[float(x) for x in filt_rows_this_group['Log2Ratio'].tolist()]
+    ratios=[2**r for r in log2Ratios]
+    avgRatio=sum(ratios)/float(len(ratios))
+    collapsedLog2Ratios=np.log2(avgRatio)
+    
+    #create a row using the group and the collapsed values
+    new_row_dict={
+        grp_col_name:[group_row[grp_col_name]]
+        for
+        grp_col_name in group_cols
+    }
+    new_row_dict['sig_p']=[new_sig_p_val]
+    new_row_dict['Log2Ratio']=[collapsedLog2Ratios]
+    new_row_df=pd.DataFrame.from_dict(new_row_dict)
+    
+    #accumulate to new_df_all as well, not just the cols for cp_input, but all the cols
+    temp_dict=dict()
+    for col in filt_rows_this_group.columns:
+        temp_dict[col]=filt_rows_this_group[col].tolist()
+    temp_dict['sig_p']=[new_sig_p_val for x in range(len(log2Ratios))]
+    temp_dict['Log2Ratio']=[collapsedLog2Ratios for x in range(len(log2Ratios))]
+    temp_df=pd.DataFrame.from_dict(temp_dict)
+
+    #merge the new row with the growing list of such rows
+    if new_df is None:
+        new_df=new_row_df.copy(deep=True)
+        new_df_all=temp_df.copy(deep=True)
+    else:
+        new_df=pd.concat([new_df.copy(deep=True),new_row_df.copy(deep=True)])
+        new_df_all=pd.concat([new_df_all.copy(deep=True),temp_df.copy(deep=True)])
+
+#write to  cp_input.tsv (cluster_profiler input)
+new_df.to_csv('cp_input.tsv', sep='\t',index=False)
+
+#add the other output file
+new_df_all.to_csv('full_annotated_cp_input.tsv',sep='\t',index=False)
+
+"""
+python3 -c "${EXTRACT_ROWS_PY_SCRIPT}" ; 
+
+#run cluster profiler
+KEGG_ORGANISM="!{params.kegg_cp_organism_str}"  KEGG_CP_FILE=kegg_db  CPSSEP=$'\\t'  Rscript /usr/local/bin/cp_script.R  cp_input.tsv Log2Ratio 0 Gene sig_p
+
+#package the outputs
+zip cp_outputs.zip  cp_input.tsv full_annotated_cp_input.tsv  cp_input.tsv.sig.*
+
+'''
+
+	}
+
+
 
 
 workflow {
@@ -682,6 +795,8 @@ workflow {
     plotting_results=circtest_plotting(raw_circtest_results_by_cohort,channel.fromPath(params.circatlas_bed),channel.fromPath(params.cohort_comp_conf))
     plotting_results_plain=circtest_plain_plotting(raw_circtest_results_by_cohort_plain,channel.fromPath(params.circatlas_bed),channel.fromPath(params.cohort_comp_conf))
 
+    //7) run cluster profiler
+    run_cluster_profiler(plotting_results,channel.fromPath(params.kegg_db))
 
 
 }
