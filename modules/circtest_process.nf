@@ -110,3 +110,42 @@ zip -r "${COHORT_TO_RUN}.circtest_results.zip" "${DG1}" ;
 '''
 
 }
+
+
+process circtest_plotting {
+
+
+input:
+	file '*'
+	file 'circatlas_bed.txt'
+	file 'cohort_comp_conf'
+	
+
+output:
+	file '*.plotting_results.zip'
+
+shell:
+'''
+echo "Started at";
+date
+#unzip the file
+unzip `find *.zip` ;
+#EXTRACT COHORTNAME FROM ZIP
+COHORT_NAME=`find *.zip | grep -Po '^[^\\.]+\\.'|tr -d "."`;
+echo "From zip file, got cohort name ${COHORT_NAME}" ; 
+#set up the output area
+PLOTTING_DIR="${COHORT_NAME}_plottting" ;
+mkdir -v ${PLOTTING_DIR}
+#define the circatlas bed file
+CA_BED="circatlas_bed.txt" ;
+#run plotting
+python3 /usr/local/bin/ct_aug.py !{params.plot_cutoff ? "-PVC "+params.plot_cutoff : ""}  ${COHORT_NAME} ${CA_BED} ${PLOTTING_DIR}/${COHORT_NAME}.merged.tsv ${PLOTTING_DIR} !{cohort_comp_conf} ; 
+#zip up results of plotting
+zip -r ${COHORT_NAME}.plotting_results.zip ${PLOTTING_DIR}
+echo "Finished at";
+date
+'''
+
+}
+
+

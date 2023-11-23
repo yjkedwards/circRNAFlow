@@ -167,85 +167,8 @@ set +x
 //include circtest modules
 include { circtest as circtest } from './modules/circtest_process.nf'
 include { circtest as circtest_plain } from './modules/circtest_process.nf'
-
-process circtest_plotting {
-
-
-input:
-	file '*'
-	file 'circatlas_bed.txt'
-	file 'cohort_comp_conf'
-	
-
-output:
-	file '*.plotting_results.zip'
-
-shell:
-'''
-echo "Started at";
-date
-#unzip the file
-unzip `find *.zip` ;
-#EXTRACT COHORTNAME FROM ZIP
-COHORT_NAME=`find *.zip | grep -Po '^[^\\.]+\\.'|tr -d "."`;
-echo "From zip file, got cohort name ${COHORT_NAME}" ; 
-#set up the output area
-PLOTTING_DIR="${COHORT_NAME}_plottting" ;
-mkdir -v ${PLOTTING_DIR}
-#define the circatlas bed file
-CA_BED="circatlas_bed.txt" ;
-#run plotting
-python3 /usr/local/bin/ct_aug.py !{params.plot_cutoff ? "-PVC "+params.plot_cutoff : ""}  ${COHORT_NAME} ${CA_BED} ${PLOTTING_DIR}/${COHORT_NAME}.merged.tsv ${PLOTTING_DIR} !{cohort_comp_conf} ; 
-#zip up results of plotting
-zip -r ${COHORT_NAME}.plotting_results.zip ${PLOTTING_DIR}
-echo "Finished at";
-date
-'''
-
-}
-
-
-
-
-
-
-process circtest_plain_plotting {
-
-
-input:
-	file '*' 
-	file 'circatlas_bed.txt' 
-	file 'cohort_comp_conf' 
-	
-
-output:
-	file '*.plotting_results.zip'
-
-shell:
-'''
-echo "Started at";
-date
-#unzip the file
-unzip `find *.zip` ;
-#EXTRACT COHORTNAME FROM ZIP
-COHORT_NAME=`find *.zip | grep -Po '^[^\\.]+\\.'|tr -d "."`;
-echo "From zip file, got cohort name ${COHORT_NAME}" ; 
-#set up the output area
-PLOTTING_DIR="${COHORT_NAME}_plottting" ;
-mkdir -v ${PLOTTING_DIR}
-#define the circatlas bed file
-CA_BED="circatlas_bed.txt" ;
-#run plotting
-python3 /usr/local/bin/ct_aug.py !{params.plot_cutoff ? "-PVC "+params.plot_cutoff : ""}  ${COHORT_NAME} ${CA_BED} ${PLOTTING_DIR}/${COHORT_NAME}.merged.tsv ${PLOTTING_DIR} !{cohort_comp_conf} ; 
-#zip up results of plotting
-zip -r ${COHORT_NAME}.plotting_results.zip ${PLOTTING_DIR}
-echo "Finished at";
-date
-'''
-
-}
-
-
+include { circtest_plotting as circtest_plotting } from './modules/circtest_process.nf'
+include { circtest_plotting as circtest_plain_plotting } from './modules/circtest_process.nf'
 
 process run_cluster_profiler {
 
