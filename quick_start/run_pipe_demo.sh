@@ -7,7 +7,8 @@ NF_ERR="${DT}.nf.err" ;
 
 # run pipeline with specific version and indicated sample/test data
 PIPE_FILE="circRNAFlow.DSL2.nf" ; 
-NXF_VER=21.10.6 nextflow -C demo.config run ${PIPE_FILE} --cohort_comp_conf pipe_data/cohort_comp_conf.json \
+set -x
+nextflow -C  demo.config   run ${PIPE_FILE} --cohort_comp_conf pipe_data/cohort_comp_conf.json \
 	--comp_list pipe_data/comp_list.txt  --adapter_fasta sample_data/adapters.fasta \
 	--fqgzglob 'sample_data/*.gz'   \
 	--rrna_glob 'ref_data/hg38_rrna_prep/human_rrnas.f*'  \
@@ -18,5 +19,6 @@ NXF_VER=21.10.6 nextflow -C demo.config run ${PIPE_FILE} --cohort_comp_conf pipe
 	--circatlas_bed ref_data/circatlas_human_bed_v2.0.txt \
 	--kegg_cp_organism_str hsa  \
 	--kegg_db ref_data/symbol_to_kegg_gid.HUMAN.csv \
-	-with-report report.html -with-trace -with-dag -resume  1>${NF_OUT} 2>${NF_ERR}
+	-with-report report.html  \
+	-with-trace trace.txt -with-dag flowchart.png -resume 1>${NF_OUT} 2>${NF_ERR}
 

@@ -78,9 +78,18 @@ ls -alht
 #RRNA DB NAME
 RRNA_DB=`find *.rev.1.bt2|sed -r "s/\\.rev.1.bt2//g"`;
 echo "Got RRNA_DB ${RRNA_DB}" ; 
+
+#set temp dir for BT2
+mkdir -v tmp
+TMPDIR="${PWD}" ; 
+export TMPDIR=`echo ${TMPDIR}` ; 
+TMPDIR2=`echo ${TMPDIR} | awk '{print $0 "/tmp" }'`;
+export TMPDIR="${TMPDIR2}" ; 
+echo "Using TMPDIR ${TMPDIR} and shell ${SHELL} in directory ${PWD}" ; 
+
 # align reads against the rRNA reference in paired end fashion
 set -x
-bowtie2 -x ${RRNA_DB} -1 `find *_R1_*.fastq.gz` -2 `find *_R2_*.fastq.gz` --no-unal --threads 8 --un-conc-gz adapter_removed_rRNA_filtered.fastq.gz 1>/dev/null 2>/dev/null
+bowtie2 -x ${RRNA_DB} -1 `find *_R1_*.fastq.gz` -2 `find *_R2_*.fastq.gz` --no-unal --threads 8 --un-conc-gz adapter_removed_rRNA_filtered.fastq.gz 1>/dev/null 2>bowtie.err
 
 #move output to a new dir and rename to input (maintain short filenames)
 mkdir -v adapter_removed_rRNA_filtered
