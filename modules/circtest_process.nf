@@ -1,9 +1,18 @@
 process circtest {
 
 input:
-	file '*'
-	file 'cohort_comp_conf'
+    //cohort name
+    val cohort_name
+
+    //data from DCC
+    path '*'
+
+    //how to compare given cohort name
+    path 'cohort_comp_conf'
+    
+    //plain or not
     val mode
+
 output:
 	file '*.circtest_results.zip'
 
@@ -19,7 +28,7 @@ done ;
 ##############################
 #distribute the columns into desired cohorts using
 # an inline python3 script
-COHORT_TO_RUN=`cat input.1` ; 
+COHORT_TO_RUN="!{cohort_name}" ; 
 echo "COHORT_TO_RUN IS ${COHORT_TO_RUN}" ; 
 COHORT_DIST="""
 import os
@@ -116,9 +125,12 @@ process circtest_plotting {
 
 
 input:
-	file '*'
-	file 'circatlas_bed.txt'
-	file 'cohort_comp_conf'
+	//zip file from circtest 
+	path '*'
+	//circatlas bed file for data joining
+	path 'circatlas_bed.txt'
+	//cohort comparison configuration
+	path 'cohort_comp_conf'
 	
 
 output:

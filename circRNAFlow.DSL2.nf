@@ -324,7 +324,7 @@ workflow {
 	// b) just read 1
 	star_first_tuple=star_align_first(rrRNACleaned,star_ref,star_gtf,"first")
 	// c) just read 2
-    star_second_tuple=star_align_second(rrRNACleaned,star_ref,star_gtf,"second")
+	star_second_tuple=star_align_second(rrRNACleaned,star_ref,star_gtf,"second")
 
 	//4) combine the star results and merge with FQ files and input to DCC
 	all_star_results=star_pair_tuple.mix(star_first_tuple)
@@ -346,20 +346,58 @@ workflow {
 		channel.fromPath(params.repeat_file)
 	)
 
-	//5) prepare for circtest by combining DCC output with comparison configuration data
-	comp_channel=Channel
+	//5) prepare for circtest by combining DCC output with comparison configuration data and the cohort list
+	cohort_channel=Channel
     	.fromPath(params.comp_list)
     	.splitText()
-	comp_circtest_channel_for_split=comp_channel.combine(circtest_staging)
-    raw_circtest_results_by_cohort=circtest(comp_circtest_channel_for_split,channel.fromPath(params.cohort_comp_conf),"")
-    raw_circtest_results_by_cohort_plain=circtest_plain(comp_circtest_channel_for_split,channel.fromPath(params.cohort_comp_conf),"plain")
+		.map{ it -> it.trim() }
+	comp_circtest_channel_for_split=cohort_channel.combine(circtest_staging).combine(channel.fromPath(params.cohort_comp_conf))
+		.tap{get_cohort_for_circtest}
+		.tap{get_data_for_circtest}
+		.tap{get_cohort_comp_conf_for_circtest}
+	cohort_for_circtest=get_cohort_for_circtest.map{ it[0] }
+	data_for_circtest=get_data_for_circtest.map{ [ it[1],it[2],it[3] ] }
+	cohort_comp_conf_for_circtest=get_cohort_comp_conf_for_circtest.map{ it[4] }
 
-    //6) run plotting
-    plotting_results=circtest_plotting(raw_circtest_results_by_cohort,channel.fromPath(params.circatlas_bed),channel.fromPath(params.cohort_comp_conf))
-    plotting_results_plain=circtest_plain_plotting(raw_circtest_results_by_cohort_plain,channel.fromPath(params.circatlas_bed),channel.fromPath(params.cohort_comp_conf))
+	//run circtest
+	raw_circtest_results_by_cohort=circtest(
+		cohort_for_circtest,
+		data_for_circtest,
+		cohort_comp_conf_for_circtest,
+		"")
+	raw_circtest_results_by_cohort_plain=circtest_plain(
+		cohort_for_circtest,
+		data_for_circtest,
+		cohort_comp_conf_for_circtest,
+		"plain")
 
-    //7) run cluster profiler
-    run_cluster_profiler(plotting_results,channel.fromPath(params.kegg_db))
+	//6) run plotting
+	for_plotting=raw_circtest_results_by_cohort.combine(channel.fromPath(params.circatlas_bed)).combine(channel.fromPath(params.cohort_comp_conf))
+		.tap{get_plotting_data}
+		.tap{get_plotting_ca}
+		.tap{get_plotting_cohort_comp_conf}
+	plotting_data=get_plotting_data.map{it[0]}
+	plotting_ca=get_plotting_ca.map{it[1]}
+	plotting_ccc=get_plotting_data.map{it[2]}
+	plotting_results=circtest_plotting(
+		plotting_data,
+		plotting_ca,
+		plotting_ccc)
+	//run plotting plain
+	for_plotting_plain=raw_circtest_results_by_cohort_plain.combine(channel.fromPath(params.circatlas_bed)).combine(channel.fromPath(params.cohort_comp_conf))
+		.tap{get_plotting_data_plain}
+		.tap{get_plotting_ca_plain}
+		.tap{get_plotting_cohort_comp_conf_plain}
+	plotting_data_plain=get_plotting_data_plain.map{it[0]}
+	plotting_ca_plain=get_plotting_ca_plain.map{it[1]}
+	plotting_ccc_plain=get_plotting_cohort_comp_conf_plain.map{it[2]}
+	plotting_results_plain=circtest_plain_plotting(
+		plotting_data_plain,
+		plotting_ca_plain,
+		plotting_ccc_plain)
+
+	//7) run cluster profiler
+	run_cluster_profiler(plotting_results,channel.fromPath(params.kegg_db))
 
 
 }
