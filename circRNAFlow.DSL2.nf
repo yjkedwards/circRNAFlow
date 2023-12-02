@@ -296,6 +296,30 @@ zip cp_outputs.zip  cp_input.tsv full_annotated_cp_input.tsv  cp_input.tsv.sig.*
 
 
 
+process prepare_for_CRAFT {
+
+input:
+	//output from circtest
+	path '*'
+
+shell:
+'''
+
+#unzip the circtest results
+mkdir -v extract_dir
+for ZIP in `find *.zip`; do
+	echo "Found ZIP file ${ZIP}" ; 
+	unzip -d extract_dir/ ${ZIP}	
+done ;
+
+#subset to find the circRNAs
+cut -f 1,2,3,4,6 `find extract_dir -iname "*.tsv"` |grep -Pv '^Chr'|sort|uniq|tr "\t" "," > circRNA_list.txt ;
+
+'''
+
+}
+
+
 
 workflow {
 
@@ -398,6 +422,9 @@ workflow {
 
 	//7) run cluster profiler
 	run_cluster_profiler(plotting_results,channel.fromPath(params.kegg_db))
+
+	//8) prepare for CRAFT
+	prepare_for_CRAFT(plotting_results.collect().flatten())
 
 
 }
