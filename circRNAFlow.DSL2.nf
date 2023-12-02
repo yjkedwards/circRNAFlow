@@ -346,7 +346,7 @@ workflow {
 		channel.fromPath(params.repeat_file)
 	)
 
-	//5) prepare for circtest by combining DCC output with comparison configuration data and the cohort list
+	//4.5) prepare for circtest by combining DCC output with comparison configuration data and the cohort list
 	cohort_channel=Channel
     	.fromPath(params.comp_list)
     	.splitText()
@@ -359,7 +359,7 @@ workflow {
 	data_for_circtest=get_data_for_circtest.map{ [ it[1],it[2],it[3] ] }
 	cohort_comp_conf_for_circtest=get_cohort_comp_conf_for_circtest.map{ it[4] }
 
-	//run circtest
+	//5) run circtest
 	raw_circtest_results_by_cohort=circtest(
 		cohort_for_circtest,
 		data_for_circtest,
