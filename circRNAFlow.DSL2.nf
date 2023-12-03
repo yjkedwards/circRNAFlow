@@ -302,6 +302,9 @@ input:
 	//output from circtest
 	path '*'
 
+output:
+	path '*.zip'
+
 shell:
 '''
 
@@ -313,13 +316,106 @@ for ZIP in `find *.zip`; do
 done ;
 
 #subset to find the circRNAs
+# columns are chrom, start, stop, gene, strand
 cut -f 1,2,3,4,6 `find extract_dir -iname "*.tsv"` |grep -Pv '^Chr'|sort|uniq|tr "\t" "," > circRNA_list.txt ;
+
+#setup the list_backsplice files
+mkdir -v backsplice_gene_name_dir
+mkdir -v list_backsplice_dir
+for CIRCRNA in `cat circRNA_list.txt`; do
+	echo "Processing a circRNA ${CIRCRNA}" ; 
+
+	#extract data for the circRNA
+	CHROM=`echo ${CIRCRNA}  | tr "," "\t" | cut -f1`; 
+	START=`echo ${CIRCRNA}  | tr "," "\t" | cut -f2`;
+	STOP=`echo ${CIRCRNA}   | tr "," "\t" | cut -f3`;
+	GENE=`echo ${CIRCRNA}   | tr "," "\t" | cut -f4`;
+	STRAND=`echo ${CIRCRNA} | tr "," "\t" | cut -f5`;
+	STRAND_FILE=`echo "${STRAND}" | awk '{if($1=="+") { print "PLUS" } else { print "MINUS" }}'` ; 
+
+	#name it
+	CIRCRNA_NAME="${CHROM}_${START}_${STOP}_${GENE}_${STRAND_FILE}" ; 
+
+	#write backsplice_gene_name.txt
+	BSGN_FILE="backsplice_gene_name_dir/${CIRCRNA_NAME}.backsplice_gene_name.txt" ; 
+	/bin/echo -ne "circ_id\tgene_names\n" > ${BSGN_FILE}
+	/bin/echo -ne "${CHROM}:${START}-${STOP}\t${GENE}\n" >> ${BSGN_FILE}
+
+	#write list_backsplice.txt
+	LBS_FILE="list_backsplice_dir/${CIRCRNA_NAME}.list_backsplice.txt" ; 
+	/bin/echo -ne "${CHROM}:${START}-${STOP}\t${STRAND}" > ${LBS_FILE} ;
+
+	#package in ZIP file
+	zip ${CIRCRNA_NAME}.zip ${BSGN_FILE} ${LBS_FILE} ; 
+
+done ;
 
 '''
 
 }
 
 
+
+process run_craft {
+
+input:
+	//circrna data
+	path 'data.zip'
+	//reference data
+	path 'input/*'
+	//craft params
+	path 'params.txt'
+output:
+	path '*.zip' , emit: craft_result_zip
+	path '*/functional_predictions/*.fa', emit: craft_result_fa
+
+
+shell:
+'''
+
+
+# setup craft data
+unzip data.zip
+mv -vi data.zip data.zip.dat #so it doesn't become output
+mkdir -pv input
+cp -v list_backsplice_dir/*.list_backsplice.txt list_backsplice.txt
+cp -v backsplice_gene_name_dir/*.backsplice_gene_name.txt input/backsplice_gene_name.txt
+
+#setup the path_files.txt
+INPUT_GTF=`find input/*.gtf`;
+INPUT_FA_REF=`find input/*.fa`  ; 
+echo "${INPUT_GTF}" | awk '{print "/annadalmolin_craft_root/" $0 }'  > path_files.txt
+echo "/annadalmolin_craft_root/input/!{params.craft_ref_path_file}" >> path_files.txt
+
+#set up the link
+echo pwd is ${PWD}
+ln -vs ${PWD} /containing_dir/link_to_target
+
+#run craft
+SKIP_CLEAR_SEQ_EXTRACT="yes"  /scripts/pipeline_predictions.sh  \
+	/annadalmolin_craft_root/list_backsplice.txt    \
+	/annadalmolin_craft_root/path_files.txt    \
+	/annadalmolin_craft_root/params.txt || true
+
+#generate output ZIP
+mkdir -pv functional_predictions
+mkdir -pv graphical_output
+mkdir -pv sequence_extraction
+ZIP_NAME=`find  backsplice_gene_name_dir/*.txt | xargs -I @ basename @ | sed -r "s/\\.backsplice_gene_name\\.txt//g" | awk '{print $0 ".zip" }'`;
+ZIP_DIR=`echo ${ZIP_NAME} | sed -r "s/\\.zip//g"` ; 
+mkdir -pv ${ZIP_DIR}
+mv -v functional_predictions graphical_output sequence_extraction ${ZIP_DIR}
+zip -r ${ZIP_NAME} ${ZIP_DIR}
+
+
+'''
+
+}
+
+
+//output:
+//	path '*.zip' , emit: craft_result_zip
+//	path 'functional_predictions/*.fa', emit: craft_result_fa
 
 workflow {
 
@@ -424,7 +520,21 @@ workflow {
 	run_cluster_profiler(plotting_results,channel.fromPath(params.kegg_db))
 
 	//8) prepare for CRAFT
-	prepare_for_CRAFT(plotting_results.collect().flatten())
+	craft_circrna_for_combine=prepare_for_CRAFT(plotting_results.collect().flatten())
+
+	//9) RUN craft
+	craft_circrna_for_combine.flatten().combine(channel.fromPath(params.craft_input_glob_str).collect().toList()).combine(channel.fromPath(params.craft_params))
+		.tap{get_craft_circrna}
+		.tap{get_craft_ref_data}
+		.tap{get_craft_params}
+	craft_circrna=get_craft_circrna.map{ it[0] }
+	craft_ref_data=get_craft_ref_data.map{it[1]}
+	craft_params=get_craft_params.map{it[2]}
+	run_craft(craft_circrna,craft_ref_data,craft_params)
+
+
+
+
 
 
 }

@@ -8,7 +8,7 @@ input:
 	path 'gtf_file'
 	val mode
 output:
-	tuple file('source_pair.txt'),file('*.*.chimeric.out.junction'),file('*.*.SJ.out.tab'),file('*.*.Aligned.sortedByCoord.out.bam') 
+	tuple path('source_pair.txt'),path('*.*.chimeric.out.junction'),path('*.*.SJ.out.tab'),path('*.*.Aligned.sortedByCoord.out.bam') 
 
 shell:
 '''
