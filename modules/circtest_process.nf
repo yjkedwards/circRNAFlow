@@ -134,7 +134,7 @@ input:
 	
 
 output:
-	file '*.plotting_results.zip'
+	path '*.plotting_results.zip'
 
 shell:
 '''

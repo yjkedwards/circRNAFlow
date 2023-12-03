@@ -64,10 +64,10 @@ process mapAgainstRRNA {
 
 
 input:
-	file '*' 
-	file '*' 
+	path '*' 
+	path '*' 
 output:
-	file 'adapter_removed_rRNA_filtered/*'
+	path 'adapter_removed_rRNA_filtered/*'
 
 
 
@@ -123,12 +123,12 @@ include { star_align_mode as star_align_second } from './modules/star.align.nf'
 process DCC_step {
 
 input:
-	file '*'
-	file 'gtf_file'
-	file 'fa_file'
-	file 'repeat_file'
+	path '*'
+	path 'gtf_file'
+	path 'fa_file'
+	path 'repeat_file'
 output:
-	tuple file('LinearCount'), file('CircRNACount'), file('CircCoordinates')
+	tuple path('LinearCount'), path('CircRNACount'), path('CircCoordinates')
 	
 shell:
 '''
@@ -185,10 +185,10 @@ include { circtest_plotting as circtest_plain_plotting } from './modules/circtes
 process run_cluster_profiler {
 
 	input:
-		file '*'
-		file 'kegg_db'
+		path '*'
+		path 'kegg_db'
 	output:
-		file 'cp_outputs.zip'
+		path 'cp_outputs.zip'
 
 shell:
 '''
