@@ -137,6 +137,21 @@ free -g
 #setup sample sheet and BAM list
 if [ -f samplesheet.txt ] ; then rm -v samplesheet.txt ; fi ;
 if [ -f bam_files ] ; then rm -v bam_files ; fi ;
+
+#setup input
+PYMAKEINPUT="""
+import glob
+fqgzs=glob.glob('*.fastq.gz')
+fqgzsr1=[f for f in fqgzs if  not '_R2_' in f]
+for f in range(len(fqgzsr1)):
+    ofile=f'input.{f+1}'
+    with open(ofile,'w') as writer:
+        writer.write(fqgzsr1[f])
+"""
+python3 -c "${PYMAKEINPUT}" 
+
+
+
 for INPUTF in `find input.*` ; do
 	SNAME=`cat ${INPUTF}`;
 	echo ${SNAME}.pair.chimeric.out.junction >> samplesheet.txt
@@ -365,9 +380,11 @@ input:
 	path 'input/*'
 	//craft params
 	path 'params.txt'
+	//craft mode
+	val craft_mode
+
 output:
 	path '*.zip' , emit: craft_result_zip
-	path '*/functional_predictions/*.fa', emit: craft_result_fa
 
 
 shell:
@@ -387,6 +404,34 @@ INPUT_FA_REF=`find input/*.fa`  ;
 echo "${INPUT_GTF}" | awk '{print "/annadalmolin_craft_root/" $0 }'  > path_files.txt
 echo "/annadalmolin_craft_root/input/!{params.craft_ref_path_file}" >> path_files.txt
 
+#change the first line to match the mode
+EDIT_PARAMS_PY="""
+import os
+
+#read file into list
+f = open('params.txt')
+lines = [l.strip() for l in f.readlines()]
+
+#validate expected length
+if len(lines)!= 8:
+    raise Exception('params.txt found to be '+len(lines)+' lines long, but expected 8 lines!')
+
+#substitute mode for the params here
+# and write out the result
+lines[0]='!{craft_mode}'
+with open('temp_params.txt','w') as writer:
+    for l in lines:
+        writer.write(l+os.linesep)
+
+"""
+python3 -c "${EDIT_PARAMS_PY}"
+#rm the params and replace with new
+rm -v params.txt
+mv -v temp_params.txt params.txt
+
+
+
+
 #set up the link
 echo pwd is ${PWD}
 ln -vs ${PWD} /containing_dir/link_to_target
@@ -401,7 +446,7 @@ SKIP_CLEAR_SEQ_EXTRACT="yes"  /scripts/pipeline_predictions.sh  \
 mkdir -pv functional_predictions
 mkdir -pv graphical_output
 mkdir -pv sequence_extraction
-ZIP_NAME=`find  backsplice_gene_name_dir/*.txt | xargs -I @ basename @ | sed -r "s/\\.backsplice_gene_name\\.txt//g" | awk '{print $0 ".zip" }'`;
+ZIP_NAME=`find  backsplice_gene_name_dir/*.txt | xargs -I @ basename @ | sed -r "s/\\.backsplice_gene_name\\.txt//g" | awk '{print $0 "_!{craft_mode}.zip" }'`;
 ZIP_DIR=`echo ${ZIP_NAME} | sed -r "s/\\.zip//g"` ; 
 mkdir -pv ${ZIP_DIR}
 mv -v functional_predictions graphical_output sequence_extraction ${ZIP_DIR}
@@ -456,8 +501,8 @@ workflow {
 		//as STAR results are combined here, this filter makes sure that samples are kept with eachother (by string comparison on sample name)
 		.filter { it[0].startsWith(it[3]) }
 		.groupTuple()
-		// -> pair name, R1 , R2, chimeric junction (3 per sample) , SJ.out(3 per sample) , Aligned.sortedByCoord.out.bam (3 per sample)
-		.map{ [ it[0],it[1][0],it[2][0] , it[4][0],it[4][1],it[4][2] , it[5][0],it[5][1],it[5][2] , it[6][0],it[6][1],it[6][2]    ] }
+		// R1 , R2, chimeric junction (3 per sample) , SJ.out(3 per sample) , Aligned.sortedByCoord.out.bam (3 per sample)
+		.map{ [ it[1][0],it[2][0] , it[4][0],it[4][1],it[4][2] , it[5][0],it[5][1],it[5][2] , it[6][0],it[6][1],it[6][2]    ] }
 		.collect()
 	circtest_staging=DCC_step(
 		DCC_input,
@@ -523,14 +568,17 @@ workflow {
 	craft_circrna_for_combine=prepare_for_CRAFT(plotting_results.collect().flatten())
 
 	//9) RUN craft
-	craft_circrna_for_combine.flatten().combine(channel.fromPath(params.craft_input_glob_str).collect().toList()).combine(channel.fromPath(params.craft_params))
+	init_craft_modes=Channel.of( 'M','R','O')
+	craft_circrna_for_combine.flatten().combine(channel.fromPath(params.craft_input_glob_str).collect().toList()).combine(channel.fromPath(params.craft_params)).combine(init_craft_modes)
 		.tap{get_craft_circrna}
 		.tap{get_craft_ref_data}
 		.tap{get_craft_params}
+		.tap{get_craft_modes}
 	craft_circrna=get_craft_circrna.map{ it[0] }
 	craft_ref_data=get_craft_ref_data.map{it[1]}
 	craft_params=get_craft_params.map{it[2]}
-	run_craft(craft_circrna,craft_ref_data,craft_params)
+	craft_mode=get_craft_modes.map{it[3]}
+	run_craft(craft_circrna,craft_ref_data,craft_params,craft_mode)
 
 
 
