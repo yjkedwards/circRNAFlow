@@ -135,7 +135,7 @@ if (__name__=="__main__"):
 			print(f"NOTE, converting T to U in the mRNA!")
 			new_seq=[base if base!='T' else 'U' for base in mrna_fasta[0]]
 			print(f"Old seq is\n{mrna_fasta[0]} and new seq is \n{new_seq}")
-			mrna_fasta[0]=new_seq
+			mrna_fasta[0]="".join(new_seq)
 
 
 		#from the mirnas, get the seeds
@@ -188,9 +188,8 @@ if (__name__=="__main__"):
 			num_pred_expected=num_seed_positions[main_id]
 			preds = model.pipeline.predict(analysis_dict, batch_size=4)
 			num_pred_received=len(preds)
-			print(f"pred is \n{preds}\n")
-			print(f"num pred expected is {num_pred_expected} ; received is {num_pred_received}")
-			#assert num_pred_received==num_pred_expected
+			print(f"Raw predictions are {preds}")
+			print(f"Number predictions expected is {num_pred_expected} ; number received is {num_pred_received}")
 			for pred_pair in preds:
 				print(f"A pred pair is {pred_pair}")
 				p_0=pred_pair[0].astype(float)
@@ -208,7 +207,7 @@ if (__name__=="__main__"):
 				json_results=json.dumps(analysis_prediction_results[analysis_id])
 				results_list_for_table.append(json_results)
 			else:
-				results_list_for_table.append("{}")
+				results_list_for_table.append("[]")
 		analysis_plan_df['predictions']=results_list_for_table
 		print(f"Writing analysis plan/results summary table to {args.OUT_PLAN}")
 		analysis_plan_df.to_csv(args.OUT_PLAN,sep="\t")
