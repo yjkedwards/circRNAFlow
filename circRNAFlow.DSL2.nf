@@ -385,6 +385,7 @@ input:
 
 output:
 	path '*.zip' , emit: craft_result_zip
+	path '*/functional_predictions/backsplice_sequence_1.fa', emit: craft_result_fa
 
 
 shell:
@@ -458,9 +459,6 @@ zip -r ${ZIP_NAME} ${ZIP_DIR}
 }
 
 
-//output:
-//	path '*.zip' , emit: craft_result_zip
-//	path 'functional_predictions/*.fa', emit: craft_result_fa
 
 workflow {
 
@@ -578,9 +576,7 @@ workflow {
 	craft_ref_data=get_craft_ref_data.map{it[1]}
 	craft_params=get_craft_params.map{it[2]}
 	craft_mode=get_craft_modes.map{it[3]}
-	run_craft(craft_circrna,craft_ref_data,craft_params,craft_mode)
-
-
+	craft_results=run_craft(craft_circrna,craft_ref_data,craft_params,craft_mode)
 
 
 
