@@ -443,6 +443,8 @@ SKIP_CLEAR_SEQ_EXTRACT="yes"  /scripts/pipeline_predictions.sh  \
 	/annadalmolin_craft_root/path_files.txt    \
 	/annadalmolin_craft_root/params.txt || true
 
+
+
 #generate output ZIP
 mkdir -pv functional_predictions
 mkdir -pv graphical_output
@@ -450,10 +452,55 @@ mkdir -pv sequence_extraction
 ZIP_NAME=`find  backsplice_gene_name_dir/*.txt | xargs -I @ basename @ | sed -r "s/\\.backsplice_gene_name\\.txt//g" | awk '{print $0 "_!{craft_mode}.zip" }'`;
 ZIP_DIR=`echo ${ZIP_NAME} | sed -r "s/\\.zip//g"` ; 
 mkdir -pv ${ZIP_DIR}
+
+#before zipping, update the fasta name
+echo ">${ZIP_DIR}" |sed -r "s/_[MRO]$//g"   > functional_predictions/tmp.fa
+grep -Pv '>' functional_predictions/backsplice_sequence_1.fa >> functional_predictions/tmp.fa
+mv -v functional_predictions/tmp.fa functional_predictions/backsplice_sequence_1.fa
+
+#zip up the fasta file and all the output!
 mv -v functional_predictions graphical_output sequence_extraction ${ZIP_DIR}
 zip -r ${ZIP_NAME} ${ZIP_DIR}
+'''
+
+}
 
 
+process deepTarget {
+
+input:
+	//query mirma
+	path 'mirna_db.fa'
+	//ref mrna
+	val 'circ_rna_str'
+
+output:
+	//results
+	path('*.dt_results.*', arity: '2')
+
+
+shell:
+'''
+
+echo -n "!{circ_rna_str}" > my_cirnrna.fa
+
+#setup to run deeptarget
+export HOME=/home/kipoi_user
+set +u
+source activate kipoi-deepTarget
+mkdir -v tmp
+
+#run deeptarget!
+head --lines=1 my_cirnrna.fa > circ_rna.T_to_U.fa
+grep -Pv '^>' my_cirnrna.fa | tr "T" "U" >> circ_rna.T_to_U.fa
+deep_target_runner.py  circ_rna.T_to_U.fa mirna_db.fa dt_results.tsv dt_results.norm.tsv tmp
+
+#get circrna_name
+CIRC_RNA_NAME=`head --lines=1 circ_rna.T_to_U.fa | tr -d ">" | tr -d " " | tr ":" "_" | tr "-" "_"`; 
+
+#rename outputs according to the circrna
+mv -v dt_results.tsv ${CIRC_RNA_NAME}.dt_results.tsv
+mv -v dt_results.norm.tsv ${CIRC_RNA_NAME}.dt_results.norm.tsv
 '''
 
 }
@@ -578,7 +625,15 @@ workflow {
 	craft_mode=get_craft_modes.map{it[3]}
 	craft_results=run_craft(craft_circrna,craft_ref_data,craft_params,craft_mode)
 
-
-
-
+	//shuttle craft outputs to deeptarget
+	craft_results_fa_for_combine=craft_results.craft_result_fa
+		.collect()
+		.flatten()
+		.map{it.text}.unique()//here extrac the fasta content and take unique sequences ; avoid redundant runs/outputs of deeptarget
+		.combine(channel.fromPath(params.deeptarget_mirna_fa))
+			.tap{get_dt_circ_mrna}
+			.tap{get_dt_mirna_db}
+	dt_circ_mrna=get_dt_circ_mrna.map{it[0]}
+	dt_mirna_db=get_dt_mirna_db.map{it[1]}
+	deepTarget(dt_mirna_db,dt_circ_mrna)
 }
