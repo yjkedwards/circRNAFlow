@@ -17,5 +17,5 @@ RUN find /opt -type f -iname "*.yaml" | xargs -tI {} sed -r -i "s/github\.com/lo
 USER kipoi_user
 RUN sed -ir -r "s/github\.com/localhost/g"   /home/kipoi_user/.kipoi/models/.git/config
 COPY deep_target_runner.py /usr/local/bin/
-
-#export HOME as /home/kipoi_user
+COPY m_patch.txt /home/kipoi_user/
+RUN cat /home/kipoi_user/m_patch.txt >> /home/kipoi_user/.kipoi/models/deepTarget/bio_utils.py

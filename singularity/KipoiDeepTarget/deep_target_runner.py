@@ -15,15 +15,72 @@ from math import log2
 from Bio import SeqIO
 import pandas as pd
 
+
+def getNormalDF(summary_df_file):
+
+	#read the file
+	summary_df=pd.read_csv(summary_df_file,sep="\t")
+
+	#first get rows of data which actually correspond to analyses
+	rows_of_analysis=summary_df[summary_df.apply(lambda row:'true' in str(row['analyze_mirna']).lower(),axis=1)]
+	norm_dict=defaultdict(list)
+
+	#helper function to turn string of array to array of data
+	def readStrArrayToListOfStr(str_arr):
+		if not str_arr[0].strip()=="[":
+			str_arr=f"[{str_arr}]"
+		jds=json.loads(str_arr)
+		return jds
+
+	def addNormDictRowsFromExistingRow(row):
+
+		#get all values which will simply be repeated
+		row_sumid=row['summary_id']
+		row_mirna_name=row['mirna_id']
+		row_mirna_seed=row['mirna_seed']
+		row_num_cand_pos=row['mirna_num_candidate_positions']
+		has_any_trans_bsj=row['has_any_trans_bsj']
+		
+
+		#get all values from arrays
+		seed_posns=readStrArrayToListOfStr(row['seed_positions'])
+		trans_bsj_indics=readStrArrayToListOfStr(row['trans_bsj_indicator'])
+		predictions=readStrArrayToListOfStr(row['predictions'])
+
+		#assert len(seed_posns)==len(trans_bsj_indics)
+		#assert len(predictions)==len(trans_bsj_indics)
+		for p in range(len(seed_posns)):
+			#iterate over each of the iterables
+			posn=seed_posns[p]
+			tbi=trans_bsj_indics[p]
+			pred_pair=predictions[p]
+
+			#add a row in the norm dict
+			norm_dict['summary_id'].append(row_sumid)
+			norm_dict['mirna_id'].append(row_mirna_name)
+			norm_dict['mirna_seed'].append(row_mirna_seed)
+			norm_dict['mirna_num_candidate_positions'].append(row_num_cand_pos)
+			norm_dict['has_any_trans_bsj'].append(has_any_trans_bsj)
+			norm_dict['seed_position'].append(posn)
+			norm_dict['trans_bsj_indicator'].append(tbi)
+			norm_dict['pred_0'].append(pred_pair[0])
+			norm_dict['pred_1'].append(pred_pair[1])
+
+	rows_of_analysis.apply(lambda row:addNormDictRowsFromExistingRow(row),axis=1)
+	norm_df=pd.DataFrame.from_dict(norm_dict)
+	return norm_df
+
+
+
+
+
 #copied/adapted FROM https://github.com/kipoi/models/blob/master/deepTarget/bio_utils.py
 class bio_utils:
 	# definitions for candiate lists
 	SEED_START = 1
 	SEED_SIZE = 6  # 6-mer seed
 	CTS_SIZE = 40
-
 	wc_pairs = {"A": "U", "U": "A", "G": "C", "C": "G"}
-
 	@staticmethod
 	def getRCSeed(mirna_sequence):
 		rev_sequence = mirna_sequence[::-1]
@@ -70,16 +127,6 @@ def setup_analysis(row,tmp_dir):
 	analysis_dict['mrna_fasta_file']=f"{tmp_dir}/{mrna_fasta_t_to_u_name}"
 	analysis_dict['query_pair_file']=f"{tmp_dir}/query_pair_file_{analysis_id}"
 	return analysis_dict
-#==> example/mrna_fasta_file <==
-#>NM_003629
-#AGAGGAAGUGGGAAGA
-#==> example/mrna_fasta_file.orig.txt <==
-#>NM_003629
-#AGAGGAAGUGGGAAG
-#>NM_001135041
-#==> example/query_pair_file <==
-#hsa-miR-33b-5p	NM_005502
-#hsa-miR-26a-5p	NM_005502
 
 def writeAnalysisFiles(analysis_dict,mirna_name,mirna_seq,mrna_name,mrna_seq,write_mrna_file=False):
 
@@ -107,11 +154,11 @@ if (__name__=="__main__"):
 	parser=argparse.ArgumentParser(description='analyze a directory of circtest outputs',formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 	parser.add_argument("MRNA_FASTA",type=str,help="MRNA fasta ; should contain ONLY ONE record ; any T found are converted to U!")
 	parser.add_argument("MIRNA_FASTA",type=str,help="path to mir fasta/database file")
-	parser.add_argument("OUT_PLAN",type=str,help="path to save analysis plan/results summary table")
+	parser.add_argument("OUT_PLAN_TSV",type=str,help="path to save analysis plan/results summary table")
+	parser.add_argument("OUT_PLAN_NORM_TSV",type=str,help="path to save normalized data (easier parsing)")
 	parser.add_argument("TMP_DIR",type=str,default="tmp",help="path to temp dir")
 	args = parser.parse_args()
 
-	
 	if(args):
 
 		#verify TMP is a directory
@@ -137,14 +184,26 @@ if (__name__=="__main__"):
 			print(f"Old seq is\n{mrna_fasta[0]} and new seq is \n{new_seq}")
 			mrna_fasta[0]="".join(new_seq)
 
+		#extend the circ_rna "in silico" so that the back-splice junction is fully considered in any analysis.
+		#  The candidate-sequence length if 40, so take the first 39-bp of the circ_mRNA and add it to the end
+		extension_msg=f"Extending the mRNA by 39 (SEED_LENGTH-1=40-1=39) to make the BSJ (backsplice junction) properly available for analysis.  "
+		extension_msg=extension_msg+f"The length of the original sequence was {len(mrna_fasta[0])}, "
+		mrna_fasta[0]=mrna_fasta[0]+mrna_fasta[0][:39]
+		extension_msg=extension_msg+f"and the length of the updated sequence is {len(mrna_fasta[0])}."
+		print(extension_msg)
+
 
 		#from the mirnas, get the seeds
 		mirna_seeds=[bio_utils.getRCSeed(mirna_fasta_seq) for mirna_fasta_seq in mirna_fasta]
 
 		#for each mirna determine how many candidate sites are in the mRNA
 		seed_positions=[bio_utils.find_candidate_positions(mirna_sequence,mrna_fasta[0]) for mirna_sequence in mirna_fasta]
-		seed_positions_csvs=[",".join([str(x) for x in p]) for p in seed_positions]
+		seed_positions_csvs=[json.dumps(p) for p in seed_positions]
 		num_seed_positions=[len(positions) for positions in seed_positions]
+
+		#for each candidate site have a marker if it spans the BSJ
+		trans_bsj=["["+",".join(["\""+str(p<=39-6)+"\"" for p in positions])+"]" for positions in seed_positions]
+		has_trans_bsj=['true' in t.lower() for t in trans_bsj]
 
 		#for each mirna, if there are no candidate positions mark it to be skipped in analysis
 		process_this_mirna=[p>0 for p in num_seed_positions]
@@ -158,11 +217,14 @@ if (__name__=="__main__"):
 				'mirna_seed':mirna_seeds,
 				'mirna_num_candidate_positions':num_seed_positions,
 				'seed_positions':seed_positions_csvs,
+				'trans_bsj_indicator':trans_bsj,
+				'has_any_trans_bsj':has_trans_bsj,
 				'analyze_mirna':process_this_mirna,
 				'mrna_name':[mrna_rec_list[0] for x in range(len(mirna_rec_list))]
 			}
 		)
 		print(analysis_plan_df.to_string(index=False))
+		analysis_plan_df.to_csv(args.OUT_PLAN_TSV,sep="\t",index=False)
 
 		#filter out work to do
 		analysis_plan_todo=analysis_plan_df[analysis_plan_df.apply(lambda row:row['analyze_mirna'],axis=1)]
@@ -174,9 +236,10 @@ if (__name__=="__main__"):
 		import kipoi
 		model = kipoi.get_model('deepTarget')
 		analysis_prediction_results=dict()
+		err_msgs=list()
 		for a in range(len(analysis_dicts)):
 
-			#write the analysis files for deeptarget
+			#write the analysis files for deeptarget (mirna fasta of one seq, query_pair file, mrna re-write if it doens't already exist)
 			analysis_dict=analysis_dicts[a]
 			main_id=int(analysis_dict['query_pair_file'].split("_")[-1])
 			if a==0:
@@ -185,13 +248,16 @@ if (__name__=="__main__"):
 				write_mrna_file=False
 			writeAnalysisFiles(analysis_dict,mirna_rec_list[main_id],mirna_fasta[main_id],mrna_rec_list[0],mrna_fasta[0],write_mrna_file)
 
+			#run deep target!
 			num_pred_expected=num_seed_positions[main_id]
 			preds = model.pipeline.predict(analysis_dict, batch_size=4)
 			num_pred_received=len(preds)
-			print(f"Raw predictions are {preds}")
-			print(f"Number predictions expected is {num_pred_expected} ; number received is {num_pred_received}")
-			for pred_pair in preds:
-				print(f"A pred pair is {pred_pair}")
+			if num_pred_received!=num_pred_expected:
+				err_msg=f"For analysis_id {main_id}, the number of predictions expected is {num_pred_expected}, but the number actually received is {num_pred_received}!"
+				err_msgs.append(err_msg)
+			for p in range(len(preds)):
+				pred_pair=preds[p]
+				print(f"For miRNA {mirna_rec_list[main_id]} (id={main_id}), for the seed at position {seed_positions[main_id][p]}, the prediction pair is {pred_pair}.")
 				p_0=pred_pair[0].astype(float)
 				p_1=pred_pair[1].astype(float)
 				if not main_id in analysis_prediction_results:
@@ -209,5 +275,13 @@ if (__name__=="__main__"):
 			else:
 				results_list_for_table.append("[]")
 		analysis_plan_df['predictions']=results_list_for_table
-		print(f"Writing analysis plan/results summary table to {args.OUT_PLAN}")
-		analysis_plan_df.to_csv(args.OUT_PLAN,sep="\t")
+		print(f"Writing analysis plan/results summary table to {args.OUT_PLAN_TSV}")
+		analysis_plan_df.to_csv(args.OUT_PLAN_TSV,sep="\t",index=False)
+		if len(err_msgs)>0:
+			complete_err_msg=" ".join(err_msgs)
+			raise Exception(complete_err_msg)
+		
+		#create/save normalized data
+		norm_results_df=getNormalDF(args.OUT_PLAN_TSV)
+		norm_results_df.to_csv(args.OUT_PLAN_NORM_TSV,index=False,sep="\t")
+		print(f"Wrote normalized results to {args.OUT_PLAN_NORM_TSV}")
