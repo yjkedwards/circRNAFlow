@@ -1,0 +1,27 @@
+
+
+#purpose is to "monkey-patch" function of the same name
+#  so that if any target-seq is short that it is printed out.
+#  The idea is to show modifications for when the target seq is 
+#  near any end or the SBJ (splice-back junction).
+def formatting_data(X_query_seqs, X_target_seqs):
+    printio=False
+    if any([len(ts)<40 for ts in X_target_seqs]):
+        printio=True
+        print(f'Input to formatting_data is {(X_query_seqs, X_target_seqs)}')
+    max_len = len(max(X_query_seqs, key=len))
+    X_mirna = sequence_to_int(X_query_seqs, max_len)
+    max_len = len(max(X_target_seqs, key=len))
+    X_mrna = sequence_to_int(X_target_seqs, max_len)
+
+    nb_timesteps = max(X_mirna.shape[1], X_mrna.shape[1])
+    X_mirna = remove_post_padding(X_mirna)
+    X_mrna = remove_post_padding(X_mrna)
+    X_mirna = make_pre_padding(X_mirna, nb_timesteps)
+    X_mrna = make_pre_padding(X_mrna, nb_timesteps)
+    if printio:
+        print(f'Output of formatting_data is {(X_mirna, X_mrna)}')
+    return (X_mirna, X_mrna)
+
+
+
