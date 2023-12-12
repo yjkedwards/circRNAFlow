@@ -375,13 +375,13 @@ process run_craft {
 
 input:
 	//circrna data
-	path 'data.zip'
+	each path('data.zip')
 	//reference data
-	path 'input/*'
+	path 'input/*' 
 	//craft params
 	path 'params.txt'
 	//craft mode
-	val craft_mode
+	each craft_mode
 
 output:
 	path '*.zip' , emit: craft_result_zip
@@ -472,7 +472,7 @@ input:
 	//query mirma
 	path 'mirna_db.fa'
 	//ref mrna
-	val 'circ_rna_str'
+	each 'circ_rna_str'
 
 output:
 	//results
@@ -610,30 +610,21 @@ workflow {
 	run_cluster_profiler(plotting_results,channel.fromPath(params.kegg_db))
 
 	//8) prepare for CRAFT
-	craft_circrna_for_combine=prepare_for_CRAFT(plotting_results.collect().flatten())
+	craft_circrna=prepare_for_CRAFT(plotting_results.collect().flatten())
 
 	//9) RUN craft
-	init_craft_modes=Channel.of( 'M','R','O')
-	craft_circrna_for_combine.flatten().combine(channel.fromPath(params.craft_input_glob_str).collect().toList()).combine(channel.fromPath(params.craft_params)).combine(init_craft_modes)
-		.tap{get_craft_circrna}
-		.tap{get_craft_ref_data}
-		.tap{get_craft_params}
-		.tap{get_craft_modes}
-	craft_circrna=get_craft_circrna.map{ it[0] }
-	craft_ref_data=get_craft_ref_data.map{it[1]}
-	craft_params=get_craft_params.map{it[2]}
-	craft_mode=get_craft_modes.map{it[3]}
-	craft_results=run_craft(craft_circrna,craft_ref_data,craft_params,craft_mode)
+	craft_modes=Channel.of('M','R','O').toList().flatten()
+	craft_results=run_craft(craft_circrna.flatten(),
+		channel.fromPath(params.craft_input_glob_str).collect(),
+		channel.fromPath(params.craft_params),
+		craft_modes)
 
 	//shuttle craft outputs to deeptarget
-	craft_results_fa_for_combine=craft_results.craft_result_fa
+	craft_results_fa_for_deepTarget=craft_results.craft_result_fa
 		.collect()
 		.flatten()
-		.map{it.text}.unique()//here extrac the fasta content and take unique sequences ; avoid redundant runs/outputs of deeptarget
-		.combine(channel.fromPath(params.deeptarget_mirna_fa))
-			.tap{get_dt_circ_mrna}
-			.tap{get_dt_mirna_db}
-	dt_circ_mrna=get_dt_circ_mrna.map{it[0]}
-	dt_mirna_db=get_dt_mirna_db.map{it[1]}
-	deepTarget(dt_mirna_db,dt_circ_mrna)
+		.map{it.text}.unique()//here extract the fasta content and take unique sequences ; avoid redundant runs of deeptarget
+	deepTarget(channel.fromPath(params.deeptarget_mirna_fa),craft_results_fa_for_deepTarget)
+
+
 }
