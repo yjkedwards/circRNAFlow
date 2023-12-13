@@ -433,9 +433,13 @@ mv -v temp_params.txt params.txt
 
 
 
-#set up the link
+#set up the link and tmpdir
 echo pwd is ${PWD}
 ln -vs ${PWD} /containing_dir/link_to_target
+mkdir -v tmp
+chmod -v 777 tmp
+export TMPDIR=${PWD}/tmp
+
 
 #run craft
 SKIP_CLEAR_SEQ_EXTRACT="yes"  /scripts/pipeline_predictions.sh  \
