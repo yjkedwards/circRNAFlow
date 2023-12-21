@@ -1,0 +1,21 @@
+
+
+#append to /home/kipoi_user/.kipoi/models/deepTarget/bio_utils.py
+def formatting_data(X_query_seqs, X_target_seqs):
+    print(f"In formatting_data, at start, data is {(X_query_seqs, X_target_seqs)}.")
+    max_len = len(max(X_query_seqs, key=len))
+    X_mirna = sequence_to_int(X_query_seqs, max_len)
+    max_len = len(max(X_target_seqs, key=len))
+    X_mrna = sequence_to_int(X_target_seqs, max_len)
+
+    nb_timesteps = max(X_mirna.shape[1], X_mrna.shape[1])
+    X_mirna = remove_post_padding(X_mirna)
+    X_mrna = remove_post_padding(X_mrna)
+    X_mirna = make_pre_padding(X_mirna, nb_timesteps)
+    X_mrna = make_pre_padding(X_mrna, nb_timesteps)
+    print(f"In formatting_data, at end, data is {(X_mirna, X_mrna)}")
+    return (X_mirna, X_mrna)
+
+
+
+

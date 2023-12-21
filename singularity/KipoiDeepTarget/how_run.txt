@@ -1,0 +1,24 @@
+  501  cd /mnt/sdc/five_tera/UAB_YE_CF/circRNAFlow/singularity/KipoiDeepTarget/
+  502  ls -alht 
+  503  rm -rf tmp/
+  504  echo ${HOME}
+  505  cat Dockerfile 
+  506  echo ${HOME}
+  507  export HOME=/home/kipoi_user
+  508  echo ${HOME}
+  509  source activate kipoi-deepTarget
+  510  ./deep_target_runner.py -h
+  511  mkdir -v tmp
+  512  #./deep_target_runner.py example/mrna_fasta_file  example/mirna_fasta_file my_results.tsv 
+  513  rm -vi my_results.tsv 
+  514  ./deep_target_runner.py example/mrna_fasta_file  example/mirna_fasta_file my_results.tsv tmp
+  515  history 
+  516  whoami 
+  517  quit
+  518  ls -alht
+  519  ./deep_target_runner.py example/mrna_fasta_file  example/mirna_fasta_file my_new_results.tsv tmp
+  520  ls -alht|head
+  521  less my_new_results.tsv 
+  522  more my_new_results.tsv 
+  523  history 
+
