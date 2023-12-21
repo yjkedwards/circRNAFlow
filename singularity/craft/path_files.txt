@@ -1,0 +1,2 @@
+/annadalmolin_craft_root/input/Homo_sapiens.GRCh38.104.gtf
+/annadalmolin_craft_root/input/Homo_sapiens.GRCh38.dna.primary_assembly.fa

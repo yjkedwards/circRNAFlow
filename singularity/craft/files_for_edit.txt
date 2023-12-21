@@ -1,0 +1,16 @@
+/scripts/script_RBP_detection.sh
+/scripts/functional_predictions_all_circRNAs.Rmd
+/scripts/functional_predictions_single_circRNA.Rmd
+/scripts/pipeline_predictions.sh
+/scripts/script_ORF_prediction.sh
+/scripts/script_miRNA_detection.sh
+/scripts/script_miRNA_detection.sh
+/scripts/script_sequence_extraction.sh
+/scripts/.Rproj.user/17B9D6AB/sources/s-7B6F05B8/3C0E9AC8-contents
+/scripts/.Rproj.user/shared/notebooks/4BF75BE2-functional_predictions_single_circRNA/1/s/chunks.json
+/scripts/.Rproj.user/shared/notebooks/4BF75BE2-functional_predictions_single_circRNA/1/17B9D6AB7B6F05B8/chunks.json
+/scripts/.Rproj.user/shared/notebooks/DA5DE4E7-functional_predictions_single_circRNA/1/s/cn4y67iz6ysyq/000002.csv
+/scripts/.Rproj.user/shared/notebooks/DA5DE4E7-functional_predictions_single_circRNA/1/s/chunks.json
+/scripts/.Rproj.user/shared/notebooks/DA5DE4E7-functional_predictions_single_circRNA/1/s/csetup_chunk/000002.csv
+/scripts/.Rproj.user/shared/notebooks/DA5DE4E7-functional_predictions_single_circRNA/1/17B9D6AB7B6F05B8/chunks.json
+/tools/beRBP/code/core_csrv.sh
