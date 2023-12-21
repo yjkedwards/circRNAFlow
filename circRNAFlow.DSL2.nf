@@ -486,6 +486,45 @@ output:
 shell:
 '''
 
+mkdir -v here_home
+cp -vr /home/kipoi_user ./here_home
+echo "before delete" ; 
+ls -alht /home/kipoi_user/
+find /home/kipoi_user/.* -maxdepth 0|grep -Pv '\\.$'|xargs rm -rf
+echo echo "after delete" ; 
+ls -alht /home/kipoi_user/
+find ${PWD}/here_home/kipoi_user/.* -maxdepth 0|grep -Pv '\\.$' | xargs -tI @ ln -vs @   /home/kipoi_user/
+echo "after links" ; 
+ls -alht /home/kipoi_user/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#set up the tmp
+echo pwd is ${PWD}
+mkdir -v tmpdir
+chmod -v 777 tmpdir
+export TMPDIR=${PWD}/tmpdir
+
+
+
+
 echo -n "!{circ_rna_str}" > my_cirnrna.fa
 
 #setup to run deeptarget
@@ -493,6 +532,11 @@ export HOME=/home/kipoi_user
 set +u
 source activate kipoi-deepTarget
 mkdir -v tmp
+
+
+
+#12
+env | sort > env_here.txt
 
 #run deeptarget!
 head --lines=1 my_cirnrna.fa > circ_rna.T_to_U.fa
