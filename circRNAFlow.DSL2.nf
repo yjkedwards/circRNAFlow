@@ -486,58 +486,35 @@ output:
 shell:
 '''
 
+#####################################################################################
+#copy home data/files to here to avoid out-of-space errors in the container.
+#   After copying here, make symlinks
 mkdir -v here_home
 cp -vr /home/kipoi_user ./here_home
-echo "before delete" ; 
-ls -alht /home/kipoi_user/
 find /home/kipoi_user/.* -maxdepth 0|grep -Pv '\\.$'|xargs rm -rf
-echo echo "after delete" ; 
-ls -alht /home/kipoi_user/
 find ${PWD}/here_home/kipoi_user/.* -maxdepth 0|grep -Pv '\\.$' | xargs -tI @ ln -vs @   /home/kipoi_user/
-echo "after links" ; 
-ls -alht /home/kipoi_user/
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+#####################################################################################
 #set up the tmp
 echo pwd is ${PWD}
 mkdir -v tmpdir
 chmod -v 777 tmpdir
 export TMPDIR=${PWD}/tmpdir
 
-
-
-
+#####################################################################################
+#setup input for deeptarget
 echo -n "!{circ_rna_str}" > my_cirnrna.fa
 
+#####################################################################################
 #setup to run deeptarget
 export HOME=/home/kipoi_user
 set +u
 source activate kipoi-deepTarget
 mkdir -v tmp
+chmod -vR 777 tmp
 
-
-
-#12
-env | sort > env_here.txt
-
+#####################################################################################
 #run deeptarget!
 head --lines=1 my_cirnrna.fa > circ_rna.T_to_U.fa
 grep -Pv '^>' my_cirnrna.fa | tr "T" "U" >> circ_rna.T_to_U.fa
@@ -549,6 +526,10 @@ CIRC_RNA_NAME=`head --lines=1 circ_rna.T_to_U.fa | tr -d ">" | tr -d " " | tr ":
 #rename outputs according to the circrna
 mv -v dt_results.tsv ${CIRC_RNA_NAME}.dt_results.tsv
 mv -v dt_results.norm.tsv ${CIRC_RNA_NAME}.dt_results.norm.tsv
+
+#if we got this far, clean up here_home
+rm -rf here_home
+
 '''
 
 }
