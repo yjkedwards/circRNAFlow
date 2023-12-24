@@ -15,7 +15,7 @@ cd ../singularity && bash ./build_all_dockers.sh && cd ../quick_start
 ```
 3. SymLink the CircRNAFlow pipline to this directory :
 ```
-ln -vs `find ../*.nf`
+ln -vs `find ../*.nf | grep -Piv 'dsl2'  `
 ```
 4. Run the command below (also from this directory) :
 
