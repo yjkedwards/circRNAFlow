@@ -645,17 +645,17 @@ class GitSource(Source):
             raise IOError("Directory {0} already exists and is non-empty".
                           format(self.local_path))
 
-        logger.info("Cloning {remote} into {local}".
-                    format(remote=self.remote_url,
-                           local=self.local_path))
-        cmd = ["git", "clone"]
-        if depth is not None:
-            cmd.append("--depth={0}".format(depth))
-        cmd.append(self.remote_url)
-        cmd.append(self.local_path)
-        printTB()
-        subprocess.call(cmd,
-                        env=dict(os.environ, GIT_LFS_SKIP_SMUDGE="1"))
+        #logger.info("Cloning {remote} into {local}".
+        #            format(remote=self.remote_url,
+        #                   local=self.local_path))
+        #cmd = ["git", "clone"]
+        #if depth is not None:
+        #    cmd.append("--depth={0}".format(depth))
+        #cmd.append(self.remote_url)
+        #cmd.append(self.local_path)
+        #printTB()
+        #subprocess.call(cmd,
+        #                env=dict(os.environ, GIT_LFS_SKIP_SMUDGE="1"))
         self._pulled = True
 
         if os.path.exists(os.path.join(self.local_path, ".gitattributes")):
@@ -670,16 +670,16 @@ class GitSource(Source):
         if not os.path.exists(self.local_path) or not os.listdir(self.local_path):
             return self.clone()
 
-        if not self.auto_update:
-            logger.warning("Pulling source even though auto_update=False")
-
-        logger.info("Update {0}".
-                    format(self.local_path))
-        printTB()
-        subprocess.call(["git",
-                         "pull"],
-                        cwd=self.local_path,
-                        env=dict(os.environ, GIT_LFS_SKIP_SMUDGE="1"))
+        #if not self.auto_update:
+        #    logger.warning("Pulling source even though auto_update=False")
+        #
+        #logger.info("Update {0}".
+        #            format(self.local_path))
+        #printTB()
+        #subprocess.call(["git",
+        #                 "pull"],
+        #                cwd=self.local_path,
+        #                env=dict(os.environ, GIT_LFS_SKIP_SMUDGE="1"))
 
         if os.path.exists(os.path.join(self.local_path, ".gitattributes")):
             if not self.use_lfs:
@@ -692,15 +692,16 @@ class GitSource(Source):
     def _commit_checkout(self, commit):
         """Checkout a particular commit
         """
-        logger.info("Update {0}".
-                    format(self.local_path))
-        printTB()
-        subprocess.call(["git",
-                         "reset",
-                         "--hard",
-                         commit],
-                        cwd=self.local_path,
-                        env=dict(os.environ, GIT_LFS_SKIP_SMUDGE="1"))
+        #logger.info("Update {0}".
+        #            format(self.local_path))
+        #printTB()
+        #subprocess.call(["git",
+        #                 "reset",
+        #                 "--hard",
+        #                 commit],
+        #                cwd=self.local_path,
+        #                env=dict(os.environ, GIT_LFS_SKIP_SMUDGE="1"))
+        pass
 
     def _list_components(self, which="model"):
         if not self._pulled and self.auto_update:
@@ -734,11 +735,11 @@ class GitSource(Source):
                 cmd = ["git-lfs",
                        "pull",
                        "-I {0}/**".format(pull_dir)]
-                logger.info(" ".join(cmd))
-                printTB()
-                subprocess.call(cmd,
-                                cwd=self.local_path,
-                                env=dict(os.environ, GIT_LFS_SKIP_SMUDGE="1"))
+                #logger.info(" ".join(cmd))
+                #printTB()
+                #subprocess.call(cmd,
+                #                cwd=self.local_path,
+                #                env=dict(os.environ, GIT_LFS_SKIP_SMUDGE="1"))
 
         return self.local_source._pull_component(component, which)
 
