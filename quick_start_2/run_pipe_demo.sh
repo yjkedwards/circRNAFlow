@@ -19,10 +19,10 @@ nextflow -C  demo.sing.config   run ${PIPE_FILE} --cohort_comp_conf pipe_data/co
 	--circatlas_bed ref_data/circatlas_human_bed_v2.0.txt \
 	--kegg_cp_organism_str hsa  \
 	--kegg_db ref_data/symbol_to_kegg_gid.HUMAN.csv \
-	--craft_input_glob_str "/mnt/sdc/five_tera/UAB_YE_CF/CRAFT_proj_dir_MRO_READONLY_NOCIRCRNA_DATA/input/*" \
-	--craft_params "/mnt/sdc/five_tera/UAB_YE_CF/CRAFT_proj_dir_MRO_READONLY_NOCIRCRNA_DATA/params.txt" \
+	--craft_input_glob_str "ref_data/craft_input/*" \
+	--craft_params "pipe_data/params.txt" \
 	--craft_ref_path_file "Homo_sapiens.GRCh38.dna.primary_assembly.fa" \
-	--deeptarget_mirna_fa "/mnt/sdc/five_tera/UAB_YE_CF/circRNAFlow/singularity/KipoiDeepTarget/example/mirna_fasta_file"  \
+	--deeptarget_mirna_fa "ref_data/mature.hsa.mirbase.fa"  \
 	-with-report report.html  \
-	-with-trace trace.txt -with-dag flowchart.png -resume #1>${NF_OUT} 2>${NF_ERR}
+	-with-trace trace.txt -with-dag flowchart.png -resume 1>${NF_OUT} 2>${NF_ERR}
 
