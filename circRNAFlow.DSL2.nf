@@ -487,12 +487,13 @@ shell:
 '''
 
 #####################################################################################
-#copy home data/files to here to avoid out-of-space errors in the container.
+#copy home data/files to here to avoid out-of-space and/or write-related errors in the container.
 #   After copying here, make symlinks
 mkdir -v here_home
 cp -vr /home/kipoi_user ./here_home
 find /home/kipoi_user/.* -maxdepth 0|grep -Pv '\\.$'|xargs rm -rf
 find ${PWD}/here_home/kipoi_user/.* -maxdepth 0|grep -Pv '\\.$' | xargs -tI @ ln -vs @   /home/kipoi_user/
+
 
 
 #####################################################################################
@@ -523,7 +524,7 @@ deep_target_runner.py  circ_rna.T_to_U.fa mirna_db.fa dt_results.tsv dt_results.
 #get circrna_name
 CIRC_RNA_NAME=`head --lines=1 circ_rna.T_to_U.fa | tr -d ">" | tr -d " " | tr ":" "_" | tr "-" "_"`; 
 
-#rename outputs according to the circrna
+#rename outputs according to the circrna name
 mv -v dt_results.tsv ${CIRC_RNA_NAME}.dt_results.tsv
 mv -v dt_results.norm.tsv ${CIRC_RNA_NAME}.dt_results.norm.tsv
 
@@ -545,7 +546,7 @@ workflow {
 
 	//1) after running FQC, pair up the FQs an then run them through flexbar for adapter removal.
 	paired_fqgz=Channel.fromPath(params.fqgzglob).map { [  new File(""+it).getName().replace('.fastq.gz', '').replace('_R1_','_RX_').replace('_R2_','_RX_') , it ] }
-		.groupTuple(by: 0)
+		.groupTuple(by: 0) //here use R1 to be the grouping mechanism
 		.map { it[1] }
 	adapter_fasta=Channel.value(file(params.adapter_fasta))
 	flexed=runFlexBar(paired_fqgz,adapter_fasta)
@@ -593,9 +594,9 @@ workflow {
 
 	//5) run circtest (here use multiple combinations of thresholds in the non-plain version)
 	raw_circtest_results_by_cohort=circtest(
-		cohort_channel, 					//cohort name (e.g. case/control)
-		circtest_staging,					//the actual DCC output LinearCount,CircRNACount,CircCoordinates)
-		channel.fromPath(params.cohort_comp_conf),		//comparison configuration for sample/cohort membership
+		cohort_channel, 				//cohort name (e.g. case/control)
+		circtest_staging,				//the actual DCC output LinearCount,CircRNACount,CircCoordinates)
+		channel.fromPath(params.cohort_comp_conf),	//comparison configuration for sample/cohort membership
 		"")
 	//circtest plain uses default circtest settings
 	raw_circtest_results_by_cohort_plain=circtest_plain(
