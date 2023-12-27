@@ -488,11 +488,8 @@ shell:
 
 #####################################################################################
 #copy home data/files to here to avoid out-of-space and/or write-related errors in the container.
-#   After copying here, make symlinks
 mkdir -v here_home
 cp -vr /home/kipoi_user ./here_home
-find /home/kipoi_user/.* -maxdepth 0|grep -Pv '\\.$'|xargs rm -rf
-find ${PWD}/here_home/kipoi_user/.* -maxdepth 0|grep -Pv '\\.$' | xargs -tI @ ln -vs @   /home/kipoi_user/
 
 
 
@@ -508,8 +505,12 @@ export TMPDIR=${PWD}/tmpdir
 echo -n "!{circ_rna_str}" > my_cirnrna.fa
 
 #####################################################################################
-#setup to run deeptarget
-export HOME=/home/kipoi_user
+#setup to run deeptarget ; use the copied files by setting HOME and _kipoi_base_dir
+# using copied files can help avoid out-of-space errors in the container and
+# permisssions-related write-errors in the container too.  Additionally the '_kipoi_base_dir'
+# variable is set to point to the copied files there too.
+export HOME="${PWD}/here_home/kipoi_user" ; 
+export _kipoi_base_dir="${HOME}" ; 
 set +u
 source activate kipoi-deepTarget
 mkdir -v tmp

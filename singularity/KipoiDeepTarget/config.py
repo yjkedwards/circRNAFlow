@@ -14,8 +14,12 @@ logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 # --------------------------------------------
 
-#EAS set _kipoi_base_dir to be HOME instead of ~ ; using ~ may cause issues on clusters using singularity
+#EAS set _kipoi_base_dir manually ; using ~ may cause issues on clusters using singularity
 _kipoi_base_dir = '/home/kipoi_user'
+if not '_kipoi_base_dir' in os.environ:
+    raise Exception(f"Error, the environment variable '_kipoi_base_dir' should be set and point to a kipoi area (exmaple /some/path/kipoi_user'  !")
+_kipoi_base_dir = os.environ['_kipoi_base_dir']
+print(f"NOTE using _kipoi_base_dir value of '{_kipoi_base_dir}'")
 
 _kipoi_dir = os.path.join(_kipoi_base_dir, '.kipoi')
 
