@@ -488,9 +488,9 @@ shell:
 
 #####################################################################################
 #copy home data/files to here to avoid out-of-space and/or write-related errors in the container.
+#   After copying here, make symlinks
 mkdir -v here_home
 cp -vr /home/kipoi_user ./here_home
-
 
 
 #####################################################################################
