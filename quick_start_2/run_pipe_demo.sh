@@ -8,7 +8,7 @@ NF_ERR="${DT}.nf.err" ;
 # run pipeline with specific version and indicated sample/test data
 PIPE_FILE="circRNAFlow.DSL2.nf" ; 
 set -x
-nextflow -C  demo.sing.config   run ${PIPE_FILE} --cohort_comp_conf pipe_data/cohort_comp_conf.json \
+nextflow -C  demo.sing.config run ${PIPE_FILE} -profile singularity   --cohort_comp_conf pipe_data/cohort_comp_conf.json \
 	--comp_list pipe_data/comp_list.txt  --adapter_fasta sample_data/adapters.fasta \
 	--fqgzglob 'sample_data/*.gz'   \
 	--rrna_glob 'ref_data/hg38_rrna_prep/human_rrnas.f*'  \
