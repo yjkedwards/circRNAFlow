@@ -1,0 +1,11 @@
+*.out
+*.err
+work
+.nextflow*
+trace*
+report*
+*.png
+pipe_data
+quick_start_output
+ref_data
+sample_data
