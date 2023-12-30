@@ -39,6 +39,7 @@ COPY m_patch.txt /home/kipoi_user/
 RUN cat /home/kipoi_user/m_patch.txt >> /home/kipoi_user/.kipoi/models/deepTarget/bio_utils.py
 USER root
 RUN find /home/kipoi_user/.* -maxdepth 0 -type d|grep -Piv '\.$'|xargs -tI {} chmod -vR 777 {}
-RUN chmod -v 777 /home/kipoi_user/
-RUN chown -v kipoi_user:kipoi_user /home/kipoi_user/
+RUN chmod -vR 777 /home/kipoi_user/
+#make all of the user's file owned by root to avoid errors/warnings about unknown user ID
+RUN chown -vR root:root /home/kipoi_user/
 USER kipoi_user
