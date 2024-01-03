@@ -9,7 +9,16 @@ So far the pipeline is developed and tested with *SLURM* and *local* executors w
 
 ### Quick Start Steps For Using the SLURM executor and singularity containers
 
-1.  Download to this "quick_start_2" directory the test data from Zenodo using these three *links*:
+1.  Clone the repo and change to this directory
+
+```
+https://github.com/yjkedwards/circRNAFlow.git
+cd circRNAFlow/quick_start_2
+```
+
+2.  Be sure that nextflow is installed and is in the path.  Nextflow is available [here](https://www.nextflow.io/ "Nextflow").  The DSL2 version of the pipeline has been developed with version 23.10.0.
+
+3.  Download to this "quick_start_2" directory the test data from Zenodo using these three *links*:
 
 * link1
 * link2
@@ -17,7 +26,7 @@ So far the pipeline is developed and tested with *SLURM* and *local* executors w
 
 These are referenced *here* and *here* on [Zenodo](https://zenodo.org/ "Zenodo").
 
-2.   Unpack the test data to reveal directories for: a) sample data, b) pipeline/configuration data, c) reference data, and d) singularity image files.
+4.   Unpack the test data to reveal directories for: a) sample data, b) pipeline/configuration data, c) reference data, and d) singularity image files.
 
 ```
 find *.tar.gz | xargs -I {} tar -xvzf {}
@@ -94,20 +103,18 @@ sif_images
 └── staruab.sif
 
 ```
-
-
-3. Create symlinks to the DSL2 code:
+5. Create symlinks to the DSL2 code:
 ```
 ln -vs ../modules
 ln -vs ../circRNAFlow.DSL2.nf
 ```
-4. Create an SBATCH file (say "sbatch_me.sh") which will run the pipeline.  The example below is available to be edited and customized:
+6. Create an SBATCH file (say "sbatch_me.sh") which will run the pipeline.  The example below is available to be edited and customized:
 ```
-
+IS AN EXAMPLE SBATCH FILE NEEDED???
 ```
 **NOTE**: within the file you create, *be sure* to customize the directories/paths in the file so that they exist on your system and so that they point to this clone of the repo.
 
-5. Customize run_pipe_demo.sh and config file as necessary.
+7. Customize run_pipe_demo.sh and config file as necessary.
 
 Set the PROFILES variable to be "singularity,slurm".  The paths for inputs should properly resolve to data on disk if steps 1 and 2 above were carried out.  Otherwise, if the data above were downloaded, but in different areas, update the paths as necessary.
 
@@ -115,11 +122,11 @@ The config file (demo.config) in this directory, is set up to use singularity im
 
 The *SLURM* profile of the config file has been customized to use the [Cheaha HPC](https://www.uab.edu/it/home/research-computing/cheaha "CHEAHA") center.  For example, the queue names have been set to use queues there.  Queue names may need adjusting (e.g. "medium" changed or "express" changed to valid names for your SLURM installation.).
 
-6. Submit the job!
+8. Submit the job!
 
 ```
 sbatch sbatch_me.sh
 ```
 
-7. Per the config file, output will appear in "quick_start_output"
+9. Per the config file, output will appear in "quick_start_output"
 
