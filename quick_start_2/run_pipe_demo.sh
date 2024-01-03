@@ -9,7 +9,7 @@ NF_ERR="${DT}.nf.err" ;
 PIPE_FILE="circRNAFlow.DSL2.nf" ; 
 PROFILES="singularity,slurm" ; 
 set -x
-nextflow -C  demo.sing.config run ${PIPE_FILE} -profile ${PROFILES}  \
+nextflow -C demo.config run ${PIPE_FILE} -profile ${PROFILES}  \
 	--cohort_comp_conf pipe_data/cohort_comp_conf.json \
 	--comp_list pipe_data/comp_list.txt  --adapter_fasta sample_data/adapters.fasta \
 	--fqgzglob 'sample_data/*.gz'   \
