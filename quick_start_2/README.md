@@ -107,11 +107,13 @@ ln -vs ../circRNAFlow.DSL2.nf
 ```
 **NOTE**: within the file you create, *be sure* to customize the directories/paths in the file so that they exist on your system and so that they point to this clone of the repo.
 
-5. Customize run_pipe_demo.sh as necessary.
+5. Customize run_pipe_demo.sh and config file as necessary.
 
 Set the PROFILES variable to be "singularity,slurm".  The paths for inputs should properly resolve to data on disk if steps 1 and 2 above were carried out.  Otherwise, if the data above were downloaded, but in different areas, update the paths as necessary.
 
-The config file in this directory, is set up to use singularity images pulling them from dockerhub.  If that is not desired and .sif files are preferred, update the config file to use .sif images under the 
+The config file (demo.config) in this directory, is set up to use singularity images pulling them from dockerhub.  If that is not desired and .sif files are preferred, update the config file to use .sif images under the 
+
+The *SLURM* profile of the config file has been customized to use the [Cheaha HPC](https://www.uab.edu/it/home/research-computing/cheaha "CHEAHA") center.  For example, the queue names have been set to use queues there.  Queue names may need adjusting (e.g. "medium" changed or "express" changed to valid names for your SLURM installation.).
 
 6. Submit the job!
 
@@ -120,3 +122,4 @@ sbatch sbatch_me.sh
 ```
 
 7. Per the config file, output will appear in "quick_start_output"
+
