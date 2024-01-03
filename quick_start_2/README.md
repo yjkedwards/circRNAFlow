@@ -12,7 +12,7 @@ So far the pipeline is developed and tested with *SLURM* and *local* executors w
 1.  Clone the repo and change to this directory
 
 ```
-https://github.com/yjkedwards/circRNAFlow.git
+git clone https://github.com/yjkedwards/circRNAFlow.git
 cd circRNAFlow/quick_start_2
 ```
 
