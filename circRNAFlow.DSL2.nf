@@ -472,6 +472,10 @@ zip -r ${ZIP_NAME} ${ZIP_DIR}
 
 process deepTarget {
 
+errorStrategy 'retry'
+maxRetries '2'
+
+
 input:
 	//query mirma
 	path 'mirna_db.fa'
