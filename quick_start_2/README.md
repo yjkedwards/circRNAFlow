@@ -138,7 +138,7 @@ PATH=${PATH}:/home/esalinas/bin/Nextflow_23.10.0
 
 7. Customize run_pipe_demo.sh and config file as necessary.
 
-Set the PROFILES variable to be "singularity,slurm".  The paths in the nextflow run commandfor inputs should already properly resolve to data on disk if steps 1 and 2 above were carried out.  Otherwise, if the data above were downloaded, but in different areas, or saved with different names, then update the paths as necessary.
+Set the PROFILES variable to be "singularity,slurm".  The paths in the nextflow run command for inputs should already properly resolve to data on disk if steps 1 and 2 above were carried out.  Otherwise, if the data above were downloaded, but in different areas, or saved with different names, then update the paths as necessary.
 
 The config file (demo.config) in this directory, is set up to use singularity images pulling them from dockerhub.  If that is not desired and .sif files are preferred, update the config file to use .sif images under the "sif_images" directory.
 
