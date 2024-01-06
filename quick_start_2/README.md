@@ -109,7 +109,7 @@ sif_images
 ln -vs ../modules
 ln -vs ../circRNAFlow.DSL2.nf
 ```
-6. Create an SBATCH file (say "sbatch_me.sh") which will run the pipeline.  An example is below is available to be  edited and customized.  Note that "##########" show some parts to take note of and possibly customize.  Some paths and modules will likely need to be customized.
+6. Create an SBATCH file (say "sbatch_me.sh") which will run the pipeline.  An example is below is available to be  edited and customized.  Note that "##########" show some parts to take note of and possibly customize.  Some paths and modules will likely need to be customized.  The email address will need to be updated too.
 ```
 #!/bin/bash
 #SBATCH --job-name=nextflow_demo
@@ -119,6 +119,7 @@ ln -vs ../circRNAFlow.DSL2.nf
 #SBATCH --partition=express
 #SBATCH --partition=medium
 #SBATCH --mail-type=FAIL
+########## change the email address here!
 #SBATCH --mail-user=YOUR_EMAIL@SERVER
 #SBATCH --mem=700GB
 ##########  change the path here where the script changes directory
