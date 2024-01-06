@@ -1,6 +1,7 @@
 ## CircRNAFlow Quick Start for DSL2
 
-🚧This is not supported and is under construction! See ../quick_start/README.md until this DSL2 is more supported.🚧
+⚠️🚧⚠️🚧This is not supported and is under construction! See ../quick_start/README.md until this DSL2 is more supported.🚧⚠️ 🚧⚠️
+
 
 
 This "quick start" for the DSL2 version of the CircRNAflow pipline provides a step-by-step method along with test data to execute a test run of the pipeline.
