@@ -112,7 +112,7 @@ ln -vs ../circRNAFlow.DSL2.nf
 6. Create an SBATCH file (say "sbatch_me.sh") which will run the pipeline.  An example is below is available to be  edited and customized.  Note that "##########" show some parts to take note of and possibly customize.  Some paths and modules will likely need to be customized.  The email address will need to be updated too.
 ```
 #!/bin/bash
-#SBATCH --job-name=nextflow_demo
+#SBATCH --job-name=circRNAFlow_demo
 ########## NOTE : change the output path here!
 #SBATCH --output=/path/that/exists/where/a/log/can/be/written/job.out
 #SBATCH --ntasks=1
