@@ -126,7 +126,8 @@ ln -vs ../circRNAFlow.DSL2.nf
 cd /path/to/circRNAFlow/quick_start_2
 ########## Our HPC uses modules.  We load singularity to be able to use singularity containers.
 module load Singularity
-########## We load a Java module to be able to use singularity containers.  You may have a different module of Java or an even more recent Java in your PATH already.
+########## We load a Java module to be able to use singularity containers.  You may have a different 
+##########    module of Java or an even more recent Java in your PATH already.
 module load Java/11.0.2
 ########## I add nextflow to my path to be able to run it with the aforementioned Java!
 PATH=${PATH}:/home/esalinas/bin/Nextflow_23.10.0
