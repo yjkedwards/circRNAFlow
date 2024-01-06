@@ -108,19 +108,39 @@ sif_images
 ln -vs ../modules
 ln -vs ../circRNAFlow.DSL2.nf
 ```
-6. Create an SBATCH file (say "sbatch_me.sh") which will run the pipeline.  The example below is available to be edited and customized:
+6. Create an SBATCH file (say "sbatch_me.sh") which will run the pipeline.  An example is below is available to be  edited and customized.  Note that "##########" show some parts to take note of and possibly customize.  Some paths and modules will likely need to be customized.
 ```
-IS AN EXAMPLE SBATCH FILE NEEDED???
+#!/bin/bash
+#SBATCH --job-name=nextflow_demo
+########## NOTE : change the output path here!
+#SBATCH --output=/path/that/exists/where/a/log/can/be/written/job.out
+#SBATCH --ntasks=1
+#SBATCH --partition=express
+#SBATCH --partition=medium
+#SBATCH --mail-type=FAIL
+#SBATCH --mail-user=YOUR_EMAIL@SERVER
+#SBATCH --mem=700GB
+##########  change the path here where the script changes directory
+cd /path/to/circRNAFlow/quick_start_2
+########## Our HPC uses modules.  We load singularity to be able to use singularity containers.
+module load Singularity
+########## We load a Java module to be able to use singularity containers.  You may have a different module of Java or an even more recent Java in your PATH already.
+module load Java/11.0.2
+########## I add nextflow to my path to be able to run it with the aforementioned Java!
+PATH=${PATH}:/home/esalinas/bin/Nextflow_23.10.0
+########## Finally the demo script is run!
+./run_pipe_demo.sh
+
 ```
 **NOTE**: within the file you create, *be sure* to customize the directories/paths in the file so that they exist on your system and so that they point to this clone of the repo.
 
 7. Customize run_pipe_demo.sh and config file as necessary.
 
-Set the PROFILES variable to be "singularity,slurm".  The paths for inputs should properly resolve to data on disk if steps 1 and 2 above were carried out.  Otherwise, if the data above were downloaded, but in different areas, update the paths as necessary.
+Set the PROFILES variable to be "singularity,slurm".  The paths in the nextflow run commandfor inputs should already properly resolve to data on disk if steps 1 and 2 above were carried out.  Otherwise, if the data above were downloaded, but in different areas, or saved with different names, then update the paths as necessary.
 
-The config file (demo.config) in this directory, is set up to use singularity images pulling them from dockerhub.  If that is not desired and .sif files are preferred, update the config file to use .sif images under the 
+The config file (demo.config) in this directory, is set up to use singularity images pulling them from dockerhub.  If that is not desired and .sif files are preferred, update the config file to use .sif images under the "sif_images" directory.
 
-The *SLURM* profile of the config file has been customized to use the [Cheaha HPC](https://www.uab.edu/it/home/research-computing/cheaha "CHEAHA") center.  For example, the queue names have been set to use queues there.  Queue names may need adjusting (e.g. "medium" changed or "express" changed to valid names for your SLURM installation.).
+The *SLURM* profile of the config file has been customized to use the [Cheaha HPC](https://www.uab.edu/it/home/research-computing/cheaha "CHEAHA") center.  For example, the queue names have been set to use queues there.  Queue names may need adjusting (e.g. "medium" changed or "express" changed to valid names for your SLURM installation environment!).
 
 8. Submit the job!
 
