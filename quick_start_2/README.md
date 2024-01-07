@@ -30,7 +30,7 @@ These are referenced *here* and *here* on [Zenodo](https://zenodo.org/ "Zenodo")
 4.   Unpack the test data to reveal directories for: a) sample data, b) pipeline/configuration data, c) reference data, and d) singularity image files.
 
 ```
-find *.tar.gz | xargs -I {} tar -xvzf {}
+find *.tar.gz | xargs -tI {} tar -xvzf {}
 ```
 
 Unpackad files should result in the file/directory structure as seen below with the 4 directories (pipe_data, sample_data, ref_data, and sif_images):
