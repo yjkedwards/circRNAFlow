@@ -130,9 +130,9 @@ module load Singularity
 ##########    module of Java or an even more recent Java in your PATH already.
 module load Java/11.0.2
 ########## I add nextflow to my path to be able to run it with the aforementioned Java!
-PATH=${PATH}:/home/esalinas/bin/Nextflow_23.10.0
+PATH=${PATH}:/path/to/dir/of/Nextflow_23.10.0
 ########## Finally the demo script is run!
-./run_pipe_demo.sh
+/bin/bash ./run_pipe_demo.sh
 
 ```
 **NOTE**: within the file you create, *be sure* to customize the directories/paths in the file so that they exist on your system and so that they point to this clone of the repo.
