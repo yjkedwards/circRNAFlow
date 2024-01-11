@@ -116,7 +116,6 @@ ln -vs ../circRNAFlow.DSL2.nf
 ########## NOTE : change the output path here!
 #SBATCH --output=/path/that/exists/where/a/log/can/be/written/job.out
 #SBATCH --ntasks=1
-#SBATCH --partition=express
 #SBATCH --partition=medium
 #SBATCH --mail-type=FAIL
 ########## change the email address here!
