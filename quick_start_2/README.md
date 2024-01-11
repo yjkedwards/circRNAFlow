@@ -137,7 +137,7 @@ PATH=${PATH}:/path/to/dir/of/Nextflow_23.10.0
 ```
 **NOTE**: within the file you create, *be sure* to customize the directories/paths in the file so that they exist on your system and so that they point to this clone of the repo.
 
-7. Customize run_pipe_demo.sh and the config file (demo.confi)  as necessary.
+7. Customize run_pipe_demo.sh and the config file (demo.config)  as necessary.
 
 Set the PROFILES variable (in run_pipe_demo.sh) to be "singularity,slurm".  The paths in the nextflow run command for inputs should already properly resolve to data on disk if steps 1 and 2 above were carried out.  Otherwise, if the data above were downloaded, but in different areas, or saved with different names, then update the paths as necessary.
 
