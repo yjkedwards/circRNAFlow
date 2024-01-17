@@ -167,7 +167,7 @@ ___
 Several profiles for *containers* are available in the demo config file:
 * docker : for using docker containers from dockerhub
 * singularity : for using singularity containers after making them from pulled docker images from dockerhub
-* singularity_local_sifs : for using singularity images from .sif files downloaded (see file downloads/links above)
+* singularity_local_sifs : for using singularity images from .sif files downloaded (see file downloads/links above).  ***NOTE*** if errors/problems arise and persist during download/expansion of singularity images from dockerhub downloads, then try this profile!
 
 ___
 
