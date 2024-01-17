@@ -8,18 +8,22 @@ This "quick start" for the DSL2 version of the CircRNAflow pipline provides a st
 
 So far the pipeline is developed and tested with *SLURM* and *local* executors with containers (either *docker* or *singularity*).  This quick-start is intended for using SLURM, but by changing the profile, docker containers or the local executor could be used!
 
-### Quick Start Steps For Using the SLURM executor and singularity containers
+## Quick Start Steps For Using the SLURM executor and singularity containers
 
-1.  Clone the repo and change to this directory
+#### 1.  Clone the repo and change to this directory
 
 ```
 git clone https://github.com/yjkedwards/circRNAFlow.git
 cd circRNAFlow/quick_start_2
 ```
 
-2.  Be sure that nextflow is installed and is in the path.  Nextflow is available [here](https://www.nextflow.io/ "Nextflow").  The DSL2 version of the pipeline has been developed with version 23.10.0.
+#### 2.  Be sure that nextflow is installed and is in the path.  
 
-3.  Download to this "quick_start_2" directory the test data from Zenodo using these three *links*:
+Nextflow is available [here](https://www.nextflow.io/ "Nextflow").  The DSL2 version of the pipeline has been developed with version 23.10.0.
+
+####  3.  Download test data.
+
+Download tests data to this "quick_start_2" directory the test data from Zenodo using these three *links*:
 
 * link1
 * link2
@@ -27,7 +31,9 @@ cd circRNAFlow/quick_start_2
 
 These are referenced *here* and *here* on [Zenodo](https://zenodo.org/ "Zenodo").
 
-4.   Unpack the test data to reveal directories for: a) sample data, b) pipeline/configuration data, c) reference data, and d) singularity image files.
+#### 4.   Unpack the test data.
+
+Unpack the test data to reveal directories for: a) sample data, b) pipeline/configuration data, c) reference data, and d) singularity image files.
 
 ```
 find *.tar.gz | xargs -tI {} tar -xvzf {}
@@ -104,12 +110,16 @@ sif_images
 └── staruab.sif
 
 ```
-5. Create symlinks to the DSL2 code:
+#### 5. Create symlinks.
+
+Create symbolic links to the DSL2 code:
 ```
 ln -vs ../modules
 ln -vs ../circRNAFlow.DSL2.nf
 ```
-6. Create an SBATCH file (say "sbatch_me.sh") which will run the pipeline.  An example is below is available to be  edited and customized.  Note that "##########" show some parts to take note of and possibly customize.  Some paths and modules will likely need to be customized.  The email address will need to be updated too.
+#### 6. Create an SBATCH file.
+
+Create an SBATCH file (say "sbatch_me.sh") which will run the pipeline.  An example is below is available to be  edited and customized.  Note that "##########" show some parts to take note of and possibly customize.  Some paths and modules will likely need to be customized.  The email address will need to be updated too.
 ```
 #!/bin/bash
 #SBATCH --job-name=circRNAFlow_demo
@@ -136,19 +146,49 @@ PATH=${PATH}:/path/to/dir/of/Nextflow_23.10.0
 ```
 **NOTE**: within the file you create, *be sure* to customize the directories/paths in the file so that they exist on your system and so that they point to this clone of the repo.
 
-7. Customize run_pipe_demo.sh and the config file (demo.config)  as necessary.
+#### 7. Customize run_pipe_demo.sh and the config file.
+
+Customize run_pipe_demo.sh and the config file (demo.config) as necessary.
+
+##### run_pipe_demo.sh
 
 Set the PROFILES variable (in run_pipe_demo.sh) to be "singularity,slurm".  The paths in the nextflow run command for inputs should already properly resolve to data on disk if steps 1 and 2 above were carried out.  Otherwise, if the data above were downloaded, but in different areas, or saved with different names, then update the paths as necessary.
+
+##### Config File (demo.config)
 
 The config file (demo.config) in this directory, is set up to use singularity images pulling them from dockerhub.  If that is not desired and .sif files are preferred, update the config file to use .sif images under the "sif_images" directory.
 
 The *SLURM* profile of the config file has been customized to use the [Cheaha HPC](https://www.uab.edu/it/home/research-computing/cheaha "CHEAHA") center.  For example, the queue names have been set to use queues there.  Queue names may need adjusting (e.g. "medium" changed or "express" changed to valid names for your SLURM installation environment!).
 
-8. Submit the job!
+___
+
+###### NOTES on container profiles available 
+
+Several profiles for *containers* are available in the demo config file:
+* docker : for using docker containers from dockerhub
+* singularity : for using singularity containers after making them from pulled docker images from dockerhub
+* singularity_local_sifs : for using singularity images from .sif files downloaded (see file downloads/links above)
+
+___
+
+###### NOTES on executor profiles available 
+
+Several profiles for *executors* are available in the demo config file:
+* local : for running processes on the same computer which is running singularity.  
+
+NOTE in this case, it is suggested to edit the *queueSize* option in the config file.  Less capable systems should use 1 or 2.  More capable systems (having additional CPUs/cores and RAM) can use higher values (4, 6, or more).   For our 256GB, 24-core server we use 6 here.
+* slurm : for using slurm to launch jobs.  
+
+As noted above, depending on the nodes/queues available, the queue names may need to be modified.  The slurm cluster we use (as users, not admins!) have queues available including amd-hdr100,express, & medium.  You may need to edit those names in the config file.  We have set values for "cpus" and "time" which we hope sensible and permissive but not too extreme, but "cpus" and "time" may also need editing for slurm.  We'd like to note too that DCC is the most resource intensive in our experience.  
+
+
+####  8. Submit the job!
 
 ```
 sbatch sbatch_me.sh
 ```
 
-9. Per the config file, output will appear in "quick_start_output"
+####  9. Look for output.
+
+Per the config file, output will appear in "quick_start_output"
 
