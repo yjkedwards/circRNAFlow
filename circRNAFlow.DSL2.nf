@@ -27,7 +27,8 @@ input:
 	path '*'
 	path 'adapter_fasta'
 output:
-    path 'flexbar_output/*.fastq.gz'
+    path 'flexbar_output/*.fastq.gz', emit: flexed_fastq
+    path 'flexbar_output/*.log', emit: flexed_log
 
 shell:
 '''
@@ -541,6 +542,23 @@ rm -rf here_home
 }
 
 
+process publishFlexBar {
+
+input:
+	path '*'
+
+output:
+	path 'flexbar_log.*'
+
+shell:
+'''
+find *.log | xargs -tI {} cp -v {} flexbar_log.{}
+exit 0;
+''' ; 
+
+}
+
+
 
 workflow {
 
@@ -555,10 +573,11 @@ workflow {
 		.map { it[1] }
 	adapter_fasta=Channel.value(file(params.adapter_fasta))
 	flexed=runFlexBar(paired_fqgz,adapter_fasta)
+	publishFlexBar(flexed.flexed_log)
 
 	//after running them through flexbar, use 
 	// 2) BWA to map against an rRNA database for rRNA filtering
-	rrRNACleaned=mapAgainstRRNA(flexed,
+	rrRNACleaned=mapAgainstRRNA(flexed.flexed_fastq,
 		channel.fromPath(params.rrna_glob).collect())
 
 	//3) map the filtered data using STAR in 3 modes:
