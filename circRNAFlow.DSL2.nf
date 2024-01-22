@@ -68,7 +68,8 @@ input:
 	path '*' 
 	path '*' 
 output:
-	path 'adapter_removed_rRNA_filtered/*'
+	path 'adapter_removed_rRNA_filtered/*', emit: rrna_cleaned_fqgz
+	path '*.bowtie.err', emit: bowtie_err_log
 
 
 
@@ -90,7 +91,8 @@ echo "Using TMPDIR ${TMPDIR} and shell ${SHELL} in directory ${PWD}" ;
 
 # align reads against the rRNA reference in paired end fashion
 set -x
-bowtie2 -x ${RRNA_DB} -1 `find *_R1_*.fastq.gz` -2 `find *_R2_*.fastq.gz` --no-unal --threads 8 --un-conc-gz adapter_removed_rRNA_filtered.fastq.gz 1>/dev/null 2>bowtie.err
+ERR_PREFIX=`find *_R1_*.fastq.gz` ; 
+bowtie2 -x ${RRNA_DB} -1 `find *_R1_*.fastq.gz` -2 `find *_R2_*.fastq.gz` --no-unal --threads 8 --un-conc-gz adapter_removed_rRNA_filtered.fastq.gz 1>/dev/null 2>${ERR_PREFIX}.bowtie.err
 
 #move output to a new dir and rename to input (maintain short filenames)
 mkdir -v adapter_removed_rRNA_filtered
@@ -578,7 +580,7 @@ workflow {
 	//after running them through flexbar, use 
 	// 2) BWA to map against an rRNA database for rRNA filtering
 	rrRNACleaned=mapAgainstRRNA(flexed.flexed_fastq,
-		channel.fromPath(params.rrna_glob).collect())
+		channel.fromPath(params.rrna_glob).collect()).rrna_cleaned_fqgz
 
 	//3) map the filtered data using STAR in 3 modes:
 		star_ref=channel.fromPath(params.stardb_glob).collect()
