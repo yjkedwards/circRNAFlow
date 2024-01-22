@@ -25,9 +25,9 @@ Nextflow is available [here](https://www.nextflow.io/ "Nextflow").  The DSL2 ver
 
 Download tests data to this "quick_start_2" directory the test data from Zenodo using these three *links*:
 
-* link1
-* link2
-* link3
+* [lumacaftor_small_test_data.circrnaflow.tar.gz](https://zenodo.org/records/7339842/files/lumacaftor_small_test_data.circrnaflow.tar.gz) **27.1 GB**
+* [lumacaftor_small_test_data_CRAFT_and_deeptarget_DSL2.tar.gz](https://zenodo.org/records/10449545/files/lumacaftor_small_test_data_CRAFT_and_deeptarget_DSL2.tar.gz) **6.8 GB**
+* [lumacaftor_small_test_data_JUST_SIFs_DSL2.tar.gz](https://zenodo.org/records/10449545/files/lumacaftor_small_test_data_JUST_SIFs_DSL2.tar.gz) **12.3 GB**
 
 These are referenced *here* and *here* on [Zenodo](https://zenodo.org/ "Zenodo").
 
@@ -191,4 +191,3 @@ sbatch sbatch_me.sh
 ####  9. Look for output.
 
 Per the config file, output will appear in "quick_start_output"
-
