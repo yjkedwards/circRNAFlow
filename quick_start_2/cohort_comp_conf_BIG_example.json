@@ -1,0 +1,113 @@
+{
+
+    "comments" : [
+	"file_samp_ren is map to rename.  output from DCC has fastq files/paths as headers.  The file_samp_ren is a dict to take FQ names and translate them to sample names",
+	"cohort_comps is a map of 'comparison group' to 'list of samples in named comparison group ; these sample names are *after* renaming is applied according to file_samp_ren.  For a comparison name, the corresponding list is a list of samples needed ; the samples are across all the groups.  For example ; a comparison named APOBEC might have 6 samples A+,B+,C+,A-,B-,C- where the first 3 samples are compared against the last 3 samples and the first 3 have one genotype (e.g. APOBEC SNP) and the last 3 samples have another genotype. (e.g. APOBEC wildtype)",
+	"comp_names is a map of comparison name to group-names.  Using the previous APOBEC example, the key might be 'APOBEC' and the two names might be 'mutants', and then 'wildtypes'"
+	],
+
+    "comparison_counts" : {
+	"cf" : 3,
+	"females" : 3,
+	"main" : 6,
+	"males" : 3,
+	"wt" : 3
+	},
+
+    "cohort_comps": {
+        "cf": [
+            "CF_veh_ML_7030",
+            "CF_veh_ML_6528",
+            "CF_veh_ML_6455",
+            "CF_veh_FL_6294",
+            "CF_veh_FL_7483",
+            "CF_veh_FL_7576"
+        ],
+        "females": [
+            "WT_veh_FL_6209",
+            "WT_veh_FL_6456",
+            "WT_veh_FL_6529",
+            "CF_veh_FL_6294",
+            "CF_veh_FL_7483",
+            "CF_veh_FL_7576"
+        ],
+        "main": [
+            "WT_veh_ML_6381",
+            "WT_veh_FL_6209",
+            "WT_veh_ML_6425",
+            "WT_veh_FL_6456",
+            "WT_veh_ML_6205",
+            "WT_veh_FL_6529",
+            "CF_veh_ML_7030",
+            "CF_veh_FL_6294",
+            "CF_veh_ML_6455",
+            "CF_veh_FL_7483",
+            "CF_veh_ML_6528",
+            "CF_veh_FL_7576"
+        ],
+        "males": [
+            "WT_veh_ML_6381",
+            "WT_veh_ML_6425",
+            "WT_veh_ML_6205",
+            "CF_veh_ML_7030",
+            "CF_veh_ML_6455",
+            "CF_veh_ML_6528"
+        ],
+        "wt": [
+            "WT_veh_ML_6381",
+            "WT_veh_ML_6205",
+            "WT_veh_ML_6425",
+            "WT_veh_FL_6209",
+            "WT_veh_FL_6456",
+            "WT_veh_FL_6529"
+        ]
+    },
+    "comp_names": {
+        "cf": [
+            "CF_ML",
+            "CF_FL"
+        ],
+        "females": [
+            "WT_FL",
+            "CF_FL"
+        ],
+        "main": [
+            "WT",
+            "CF"
+        ],
+        "males": [
+            "WT_ML",
+            "CF_ML"
+        ],
+        "wt": [
+            "WT_ML",
+            "WT_FL"
+        ]
+    },
+    "file_samp_ren": {
+        "111A_1.fq.gz": "WT_veh_ML_6381",
+        "111A_2.fq.gz": "WT_veh_ML_6381",
+        "121A_1.fq.gz": "WT_veh_ML_6425",
+        "121A_2.fq.gz": "WT_veh_ML_6425",
+        "161A_1.fq.gz": "WT_veh_FL_6209",
+        "161A_2.fq.gz": "WT_veh_FL_6209",
+        "18A_1.fq.gz": "WT_veh_FL_6456",
+        "18A_2.fq.gz": "WT_veh_FL_6456",
+        "1ReA_1.fq.gz": "WT_veh_ML_6205",
+        "1ReA_2.fq.gz": "WT_veh_ML_6205",
+        "22A_1.fq.gz": "CF_veh_ML_6455",
+        "22A_2.fq.gz": "CF_veh_ML_6455",
+        "23A_1.fq.gz": "CF_veh_ML_6528",
+        "23A_2.fq.gz": "CF_veh_ML_6528",
+        "24A_1.fq.gz": "CF_veh_ML_7030",
+        "24A_2.fq.gz": "CF_veh_ML_7030",
+        "281A_1.fq.gz": "CF_veh_FL_6294",
+        "281A_2.fq.gz": "CF_veh_FL_6294",
+        "291A_1.fq.gz": "CF_veh_FL_7483",
+        "291A_2.fq.gz": "CF_veh_FL_7483",
+        "57A_1.fq.gz": "WT_veh_FL_6529",
+        "57A_2.fq.gz": "WT_veh_FL_6529",
+        "64A_1.fq.gz": "CF_veh_FL_7576",
+        "64A_2.fq.gz": "CF_veh_FL_7576"
+    }
+}
