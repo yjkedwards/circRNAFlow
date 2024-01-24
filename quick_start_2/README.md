@@ -8,7 +8,7 @@ This "quick start" for the DSL2 version of the CircRNAflow pipline provides a st
 
 So far the pipeline is developed and tested with *SLURM* and *local* executors with containers (either *docker* or *singularity*).  This quick-start is intended for using SLURM, but by changing the profile, docker containers or the local executor could be used!
 
-Though the pipeline has been tested with singularity and docker containers and has been run successfully locally or on SLURM other environment might work, but we may not be able to support those.  Additionally, the pipeline has been successfully run with mouse and human data.  In theory other reference could work, but only mouse and human have been used.
+Though the pipeline has been tested with singularity and docker containers and has been run successfully locally or on SLURM other environment might work, but we may not be able to support those.  Additionally, the pipeline has been successfully run with mouse and human data.  At this time *only* mouse and human are supported ; note that the ClusterProfiler portion can only run in those modes (hsa or mmu).
 
 ## Quick Start Steps For Using the SLURM executor and singularity containers
 
