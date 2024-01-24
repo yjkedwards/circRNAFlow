@@ -8,6 +8,8 @@ This "quick start" for the DSL2 version of the CircRNAflow pipline provides a st
 
 So far the pipeline is developed and tested with *SLURM* and *local* executors with containers (either *docker* or *singularity*).  This quick-start is intended for using SLURM, but by changing the profile, docker containers or the local executor could be used!
 
+Though the pipeline has been tested with singularity and docker containers and has been run successfully locally or on SLURM other environment might work, but we may not be able to support those.  Additionally, the pipeline has been successfully run with mouse and human data.  In theory other reference could work, but only mouse and human have been used.
+
 ## Quick Start Steps For Using the SLURM executor and singularity containers
 
 #### 1.  Clone the repo and change to this directory
@@ -191,3 +193,42 @@ sbatch sbatch_me.sh
 ####  9. Look for output.
 
 Per the config file, output will appear in "quick_start_output"
+
+___
+
+
+## **Notes on Using Your Own Data**
+
+To submit your own data, the command line parameters will need to be modified.  Additionally, the config file will also need to be modified.  Use the .sh and the .config files in this directory as an example!  Additionally, for comparisons see the section below ("For Defining Comparisons") on how to create/edit the cohort_comp_conf and comp_list files.
+
+#### For Input FastqGZ
+
+For Input FastQ data, be sure to name the files of a pair the exact same, but "\_R1\_" for R1 and similarly "\_R2\_" for R2.  Additionally, the files sholdbe named like this : "SRR8383065_R1_f.fastq.gz" matching the pattern:
+* alphanumeric (for sample name),
+* \_R1\_ for either R1 or R2,
+* f.fastq.gz as the suffix.
+
+These file name restrictions are in place instead of a sample sheet.
+
+#### For Defining Comparisons
+
+For comparison configuration use the files "pipe_data/cohort_comp_conf.json" and "pipe_data/comp_list.txt" available in [lumacaftor_small_test_data.circrnaflow.tar.gz](https://zenodo.org/records/7339842/files/lumacaftor_small_test_data.circrnaflow.tar.gz).  Additionally, more comparisons can be made by adding to the lists and structures in those files.  The files comp_list_BIG_example.txt and cohort_comp_conf_BIG_example.json in this directory serve as additional examples.  Notably in the JSON file the following sections are used and described here:
+* comments : an array of comment strings
+* comparison_counts: a dict-structure of key-value (string -> int) pairs indicating for each sample cohort the number of samples in it
+* cohort_comps: a dict-structure of string -> list-of-strings key-value pairs defining samples contained in each cohort
+* comp_names: short for "comparison names", a dict of string -> list-of-strings key-value pairs defining short/abbreviated names used in some outputs of the pipeline
+* file_samp_ren: a dict of string->string key value pairs assigning a sample name to each input fastq
+
+#### On Large Reference Data
+
+For reference data (e.g. rRNA database, STAR database, GTF file, repeat_file), please see examples using human data in [lumacaftor_small_test_data.circrnaflow.tar.gz](https://zenodo.org/records/7339842/files/lumacaftor_small_test_data.circrnaflow.tar.gz).  The repeat_file is a GTF of repeat regions.  Some small bioinformatics exercises may be necessary to generate this for other organisms.
+
+#### On Small Reference Data
+
+For the circatlas file see an example file in [lumacaftor_small_test_data.circrnaflow.tar.gz](https://zenodo.org/records/7339842/files/lumacaftor_small_test_data.circrnaflow.tar.gz).  Newer data may be available later at the CircAtlas website: [here](https://ngdc.cncb.ac.cn/circatlas/).
+
+For KEGG, used in ClusterProfiler use the organism code "hsa" for human for example or "mmu" for mouse.  The example data here is human.  The kegg_db file is a CSV file of geneID to KEGG ID.  See the file in  [lumacaftor_small_test_data.circrnaflow.tar.gz](https://zenodo.org/records/7339842/files/lumacaftor_small_test_data.circrnaflow.tar.gz) for an example.
+
+For CRAFT we setup data/files as the [CRAFT page](https://github.com/annadalmolin/CRAFT) suggests.    Editing of the params.txt may be desired to customize settings.
+
+For deeptarget a copy of the mirbase FASTA was downloaded and is used.  
