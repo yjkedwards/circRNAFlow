@@ -196,6 +196,30 @@ Per the config file, output will appear in "quick_start_output"
 
 ___
 
+## **Explanation of Input Parameters**
+
+This section gives a brief explanation of the input parameters - what they are.  The next section gives additional details about any details/strategies on how to use them (as applicable).
+
+***NOTE*** for ALL of the input parameters, see the "run_pipe_demo.sh" file for examples. Additionally, by downloading all the example data above (see "Download test data" above) there is some human and test data available.
+
+* cohort_comp_conf: a JSON-formatted file telling how to make comparisons
+* comp_list: a simple text file listing names of comparisons to be made
+* fqgzglob: a *quoted* (meaning in quotes!) shell-style glob (e.g. 'sample_data/*.gz') which points to ALL of the configuration files.  <mark>**NOTE**</mark>, as detailed in the next section, the input files must follow a naming convention.
+* rrna_glob: a *quoted* glob referring to the bowtie-formatted database of rRNA data used to align NGS data against for filtering/cleaning out rRNA data.
+* gtf_file: path to the GTF file (note, NOT for CRAFT) but for DCC
+* stardb_glob:  a *quoted* glob of STAR-formatted reference data files
+* fa_ref_file: path to the FASTA genome reference file (e.g. hg38.fa)
+* repeat_file: GTF-formatted file of repeats, used by DCC
+* circatlas_bed: circatlas file downloaded from circatlas
+* kegg_cp_organism_str: either "hsa" (for human) or "mmu" (for mouse)
+* kegg_db: path to a comma-separated values mapping gene symbols to KEGG gene IDs
+* craft_input_glob_str: a quoted glob to input files for CRAFT (see section below for additional details and a link to the CRAFT page).  Example data is available in [lumacaftor_small_test_data_CRAFT_and_deeptarget_DSL2.tar.gz](https://zenodo.org/records/10449545/files/lumacaftor_small_test_data_CRAFT_and_deeptarget_DSL2.tar.gz)
+* craft_params: a text file giving parametr values for CRAFT (see the section below for details, an example in the downloaded file [lumacaftor_small_test_data_CRAFT_and_deeptarget_DSL2.tar.gz](https://zenodo.org/records/10449545/files/lumacaftor_small_test_data_CRAFT_and_deeptarget_DSL2.tar.gz).
+* craft_ref_path_file: the *basename* of the FA file in the in the reference data for craft, not the one for the BLAST database however.  This might be confusing, please see run_pipe_demo.sh and the exmample downloaded data in [lumacaftor_small_test_data_CRAFT_and_deeptarget_DSL2.tar.gz](https://zenodo.org/records/10449545/files/lumacaftor_small_test_data_CRAFT_and_deeptarget_DSL2.tar.gz).
+* deeptarget_mirna_fa: a FASTA formatted file of miRNA (mirbase is suggested).  Used with deeptarget.
+
+___
+
 
 ## **Notes on Using Your Own Data**
 
@@ -209,6 +233,8 @@ For Input FastQ data, be sure to name the files of a pair the exact same, but "\
 * f.fastq.gz as the suffix.
 
 These file name restrictions are in place instead of a sample sheet.
+
+<mark>**NOTE**</mark> the fqgzglob input parameter should be unclosed in quotes.  Otherwise, it can be interpreted by the shell.  The quotes help ensure the glob to be interpreted by *nextflow*.  <mark>**Additionally</mark> other parameters need to also be quoted.  See the run_pipe_demo.sh for example as well as the section above for additional notes.
 
 #### For Defining Comparisons
 
@@ -227,8 +253,8 @@ For reference data (e.g. rRNA database, STAR database, GTF file, repeat_file), p
 
 For the circatlas file see an example file in [lumacaftor_small_test_data.circrnaflow.tar.gz](https://zenodo.org/records/7339842/files/lumacaftor_small_test_data.circrnaflow.tar.gz).  Newer data may be available later at the CircAtlas website: [here](https://ngdc.cncb.ac.cn/circatlas/).
 
-For KEGG, used in ClusterProfiler use the organism code "hsa" for human for example or "mmu" for mouse.  The example data here is human.  The kegg_db file is a CSV file of geneID to KEGG ID.  See the file in  [lumacaftor_small_test_data.circrnaflow.tar.gz](https://zenodo.org/records/7339842/files/lumacaftor_small_test_data.circrnaflow.tar.gz) for an example.
+For KEGG, used in ClusterProfiler use the organism code "hsa" for human for example or "mmu" for mouse.  The example data here is human.  The kegg_db file is a CSV file of geneID to KEGG ID.  Additionally, a header row is expected in the file with the header values being "SYMBOL" and "KEGG_GENE_ID".  See the file in  [lumacaftor_small_test_data.circrnaflow.tar.gz](https://zenodo.org/records/7339842/files/lumacaftor_small_test_data.circrnaflow.tar.gz) for an example.
 
-For CRAFT we setup data/files as the [CRAFT page](https://github.com/annadalmolin/CRAFT) suggests.    Editing of the params.txt may be desired to customize settings.
+For CRAFT we setup data/files as the [CRAFT page](https://github.com/annadalmolin/CRAFT) suggests.  Data includes a formatted BLAST database (for beRBP), a reference genome, and possibly an AGO sites file.  See the CRAFT page for additional details.  Editing of the params.txt may be desired to customize settings.
 
-For deeptarget a copy of the mirbase FASTA was downloaded and is used.  
+For deeptarget a copy of the [mirbase](https://mirbase.org/download/) FASTA was downloaded and is used.  
