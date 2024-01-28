@@ -202,15 +202,15 @@ This section gives a brief explanation of the input parameters - what they are. 
 
 ***NOTE*** for ALL of the input parameters, see the "run_pipe_demo.sh" file for examples. Additionally, by downloading all the example data above (see "Download test data" above) there is some human and test data available.
 
-* cohort_comp_conf: a JSON-formatted file telling how to make comparisons
+* cohort_comp_conf: a JSON-formatted file telling how to make comparisons (see the note below about [On Defining Comparisons](#on-defining-comparisons) )
 * comp_list: a simple text file listing names of comparisons to be made
 * fqgzglob: a *quoted* (meaning in quotes!) shell-style glob (e.g. 'sample_data/*.gz') which points to ALL of the configuration files.  <mark>**NOTE**</mark>, as detailed in the next section, the input files must follow a naming convention.
 * rrna_glob: a *quoted* glob referring to the bowtie-formatted database of rRNA data used to align NGS data against for filtering/cleaning out rRNA data.
 * gtf_file: path to the GTF file (note, NOT for CRAFT) but for DCC
-* stardb_glob:  a *quoted* glob of STAR-formatted reference data files
+* stardb_glob:  a *quoted* glob of STAR-formatted reference data files ; used by STAR for the alignments used by DCC.
 * fa_ref_file: path to the FASTA genome reference file (e.g. hg38.fa)
 * repeat_file: GTF-formatted file of repeats, used by DCC
-* circatlas_bed: circatlas file downloaded from circatlas
+* circatlas_bed: circatlas file downloaded from [circatlas](https://ngdc.cncb.ac.cn/circatlas/)
 * kegg_cp_organism_str: either "hsa" (for human) or "mmu" (for mouse)
 * kegg_db: path to a comma-separated values mapping gene symbols to KEGG gene IDs
 * craft_input_glob_str: a quoted glob to input files for CRAFT (see section below for additional details and a link to the CRAFT page).  Example data is available in [lumacaftor_small_test_data_CRAFT_and_deeptarget_DSL2.tar.gz](https://zenodo.org/records/10449545/files/lumacaftor_small_test_data_CRAFT_and_deeptarget_DSL2.tar.gz)
@@ -236,7 +236,7 @@ These file name restrictions are in place instead of a sample sheet.
 
 <mark>**NOTE**</mark> the fqgzglob input parameter should be unclosed in quotes.  Otherwise, it can be interpreted by the shell.  The quotes help ensure the glob to be interpreted by *nextflow*.  <mark>**Additionally</mark> other parameters need to also be quoted.  See the run_pipe_demo.sh for example as well as the section above for additional notes.
 
-#### For Defining Comparisons
+#### On Defining Comparisons
 
 For comparison configuration use the files "pipe_data/cohort_comp_conf.json" and "pipe_data/comp_list.txt" available in [lumacaftor_small_test_data.circrnaflow.tar.gz](https://zenodo.org/records/7339842/files/lumacaftor_small_test_data.circrnaflow.tar.gz).  Additionally, more comparisons can be made by adding to the lists and structures in those files.  The files comp_list_BIG_example.txt and cohort_comp_conf_BIG_example.json in this directory serve as additional examples.  Notably in the JSON file the following sections are used and described here:
 * comments : an array of comment strings
