@@ -180,7 +180,7 @@ ___
 Two profiles for *executors* are available in the demo config file:
 * local : for running processes on the same computer which is running singularity.  
 
-NOTE if using the local executor it is suggested to consider the *queueSize* option in the config file and consider editing it.  As discussed in greater detail in the [nextflow documentation](https://www.nextflow.io/docs/latest/config.html#scope-executor), queueSize sets parallelism - higher numbers for higher parallelism.  0 for no limit.  Less capable systems should use 1 or 2.  More capable systems (having additional CPUs/cores and RAM) can use higher values (4, 6, or more).   For our 256GB, 24-core server we use 6 for the queueSize.
+NOTE if using the local executor it is suggested to consider the *queueSize* option in the config file and consider editing it.  As discussed in greater detail in the [nextflow documentation](https://www.nextflow.io/docs/latest/config.html#scope-executor), queueSize sets parallelism - higher numbers for higher parallelism.  0 for no limit.  Less capable systems should use 1 or 2.  More capable systems (having additional CPUs/cores and RAM) can use higher values (4, 6, or more).   For our 256GB, 32-core server we use 6 for the queueSize.
 * slurm : for using slurm to launch jobs.  
 
 As noted above, depending on the nodes/queues available, the queue names may need to be modified.  The slurm cluster we use (as users, not admins!) have queues available including amd-hdr100,express, & medium.  You may need to edit those names in the config file.  We have set values for "cpus" and "time" which we hope sensible and permissive but not too extreme, but "cpus" and "time" may also need editing for slurm.  We'd like to note too that DCC is the most resource intensive in our experience.  
@@ -202,7 +202,7 @@ ___
 
 This section gives a brief explanation of the input parameters - what they are and which software uses them.  The next section gives additional details about any details/strategies on how to use them (as applicable).
 
-***NOTE*** for ALL of the input parameters, see the "run_pipe_demo.sh" file for examples. Additionally, by downloading all the example data above (see [Download test data](#3.-download-test-data.) above) there is some human and test data available.
+***NOTE*** for ALL of the input parameters, see the "run_pipe_demo.sh" file for examples. Additionally, by downloading all the example data above (see "Download test data" above) some human data and configuration files are made available.
 
 * cohort_comp_conf: a JSON-formatted file telling how to make comparisons (see the note below about [On Defining Comparisons](#on-defining-comparisons))
 * comp_list: a simple text file listing names of comparisons to be made
@@ -230,7 +230,7 @@ To submit your own data, the command line parameters will need to be modified.  
 #### For Input FastqGZ
 
 For Input FastQ data, be sure to name the files of a pair the exact same, but "\_R1\_" for R1 and similarly "\_R2\_" for R2.  Additionally, the files sholdbe named like this : "SRR8383065_R1_f.fastq.gz" matching the pattern:
-* alphanumeric (for sample name),
+* alphanumeric (for sample name) and *no spaces*,
 * \_R1\_ for either R1 or R2,
 * f.fastq.gz as the suffix.
 
@@ -240,12 +240,28 @@ These file name restrictions are in place instead of a sample sheet.
 
 #### On Defining Comparisons
 
-For comparison configuration use the files "pipe_data/cohort_comp_conf.json" and "pipe_data/comp_list.txt" available in [lumacaftor_small_test_data.circrnaflow.tar.gz](https://zenodo.org/records/7339842/files/lumacaftor_small_test_data.circrnaflow.tar.gz).  Additionally, more comparisons can be made by adding to the lists and structures in those files.  The files comp_list_BIG_example.txt and cohort_comp_conf_BIG_example.json in this directory serve as additional examples.  Notably in the JSON file the following sections are used and described here:
+For comparison configuration use the files "pipe_data/cohort_comp_conf.json" and "pipe_data/comp_list.txt" available in [lumacaftor_small_test_data.circrnaflow.tar.gz](https://zenodo.org/records/7339842/files/lumacaftor_small_test_data.circrnaflow.tar.gz).  Additionally, more comparisons can be made by adding to the lists and structures in those files.  The files comp_list_BIG_example.txt and cohort_comp_conf_BIG_example.json in this directory serve as additional examples.  
+
+Notably in the JSON file the following sections are used and described here:
 * comments : an array of comment strings
-* comparison_counts: a dict-structure of key-value (string -> int) pairs indicating for each sample cohort the number of samples in it
+* comparison_counts: a dict-structure of key-value (string -> int) pairs indicating for each comparison (between two groups) how many samples are in the first of the two groups.
 * cohort_comps: a dict-structure of string -> list-of-strings key-value pairs defining samples contained in each cohort
-* comp_names: short for "comparison names", a dict of string -> list-of-strings key-value pairs defining short/abbreviated names used in some outputs of the pipeline
+* comp_names: short for "comparison names", a dict of string -> list-of-strings key-value pairs defining short/abbreviated names used in some outputs of the pipeline and also names each group in a comparison pair
 * file_samp_ren: a dict of string->string key value pairs assigning a sample name to each input fastq
+
+The cohort_comp_conf_BIG_example.json file has 12 samples (24 fastq.gz files from pair-end NGS).
+
+1. It has an unused comments key/value giving some notes similar to those here.
+2. It lists 5 cohorts in a "comparison_counts" list.  The keys are the names of 5 comparisons to be made, and the values are how many samples are in the first group of each pair.  For example, in the "cf" the value is 3.  This means in the "cf" comparison the first 3 samples belong to the first group.  For the "main" group the value is 6.  Additionally, the "3" for "cf" refers to the first 3 samples in the "cf" comparison list in the section called "cohort_comps" (namely "CF_veh_ML_7030", "CF_veh_ML_6528", and "CF_veh_ML_6455").
+3. The next key "cohort_comps" lists comparisons to be made and for each of those comparisons all samples involed.  Additionally, as in the item above, the first "n" samples are defined to be in one of the groups.  For example for the "main" comparison, there are 12 samples involved.  Since the "comparison_counts" has a "6" for "main" the first 6 of those samples are compared with all the following samples in the "main" comparison (in this case also 6).
+4. The "comp_names" assigns names to each group in a pair of groups for comparison. For example in the "main" comparison, we compared WT (wild-type) vs CF (cystic fibrosis).
+
+During the course of making/editing the JSON file run a command like
+
+```
+python3 -mjson.tool file.json
+```
+to verify that the file is valid JSON.  If the file is valid JSON, then "pretty-print" JSON is echoed back.  Otherwise, an error and information is provided to correct the error is returned.
 
 #### On Large Reference Data
 
