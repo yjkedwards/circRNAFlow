@@ -23,7 +23,7 @@ cd circRNAFlow/quick_start_2
 
 Nextflow is available [here](https://www.nextflow.io/ "Nextflow").  The DSL2 version of the pipeline has been developed with version 23.10.0.
 
-####  3.  Download test data.
+#### 3.  Download test data.
 
 Download tests data to this "quick_start_2" directory the test data from Zenodo using these three *links*:
 
@@ -32,6 +32,8 @@ Download tests data to this "quick_start_2" directory the test data from Zenodo 
 * [lumacaftor_small_test_data_JUST_SIFs_DSL2.tar.gz](https://zenodo.org/records/10449545/files/lumacaftor_small_test_data_JUST_SIFs_DSL2.tar.gz) **12.3 GB**
 
 These are referenced *here* and *here* on [Zenodo](https://zenodo.org/ "Zenodo").
+
+The test data here from Zenodo are a subset of a larger dataset used in this [analysis/publication](https://pubmed.ncbi.nlm.nih.gov/37142522/).  The data here are subsetted to cover some circularRNA for the 
 
 #### 4.   Unpack the test data.
 
@@ -158,7 +160,7 @@ Set the PROFILES variable (in run_pipe_demo.sh) to be "singularity,slurm".  The 
 
 ##### Config File (demo.config)
 
-The config file (demo.config) in this directory, is set up to use singularity images pulling them from dockerhub.  If that is not desired and .sif files are preferred, update the config file to use .sif images under the "sif_images" directory.
+The config file (demo.config) in this directory, is set up to use singularity images pulling them from dockerhub.  If that is not desired and local .sif files are preferred, update the config file to use .sif images under the "sif_images" directory.  The preferred way to do this is to change the "singularity" profile to "singularity_local_sifs" (see the immediate [next section](notes-on-container-profiles-available)).
 
 The *SLURM* profile of the config file has been customized to use the [Cheaha HPC](https://www.uab.edu/it/home/research-computing/cheaha "CHEAHA") center.  For example, the queue names have been set to use queues there.  Queue names may need adjusting (e.g. "medium" changed or "express" changed to valid names for your SLURM installation environment!).
 
@@ -175,10 +177,10 @@ ___
 
 ###### NOTES on executor profiles available 
 
-Several profiles for *executors* are available in the demo config file:
+Two profiles for *executors* are available in the demo config file:
 * local : for running processes on the same computer which is running singularity.  
 
-NOTE in this case, it is suggested to edit the *queueSize* option in the config file.  Less capable systems should use 1 or 2.  More capable systems (having additional CPUs/cores and RAM) can use higher values (4, 6, or more).   For our 256GB, 24-core server we use 6 here.
+NOTE if using the local executor it is suggested to consider the *queueSize* option in the config file and consider editing it.  As discussed in greater detail in the [nextflow documentation](https://www.nextflow.io/docs/latest/config.html#scope-executor), queueSize sets parallelism - higher numbers for higher parallelism.  0 for no limit.  Less capable systems should use 1 or 2.  More capable systems (having additional CPUs/cores and RAM) can use higher values (4, 6, or more).   For our 256GB, 24-core server we use 6 for the queueSize.
 * slurm : for using slurm to launch jobs.  
 
 As noted above, depending on the nodes/queues available, the queue names may need to be modified.  The slurm cluster we use (as users, not admins!) have queues available including amd-hdr100,express, & medium.  You may need to edit those names in the config file.  We have set values for "cpus" and "time" which we hope sensible and permissive but not too extreme, but "cpus" and "time" may also need editing for slurm.  We'd like to note too that DCC is the most resource intensive in our experience.  
@@ -192,27 +194,27 @@ sbatch sbatch_me.sh
 
 ####  9. Look for output.
 
-Per the config file, output will appear in "quick_start_output"
+Per the config file, output will appear in "quick_start_output"!
 
 ___
 
 ## **Explanation of Input Parameters**
 
-This section gives a brief explanation of the input parameters - what they are.  The next section gives additional details about any details/strategies on how to use them (as applicable).
+This section gives a brief explanation of the input parameters - what they are and which software uses them.  The next section gives additional details about any details/strategies on how to use them (as applicable).
 
-***NOTE*** for ALL of the input parameters, see the "run_pipe_demo.sh" file for examples. Additionally, by downloading all the example data above (see "Download test data" above) there is some human and test data available.
+***NOTE*** for ALL of the input parameters, see the "run_pipe_demo.sh" file for examples. Additionally, by downloading all the example data above (see [Download test data](#3.-download-test-data.) above) there is some human and test data available.
 
-* cohort_comp_conf: a JSON-formatted file telling how to make comparisons (see the note below about [On Defining Comparisons](#on-defining-comparisons) )
+* cohort_comp_conf: a JSON-formatted file telling how to make comparisons (see the note below about [On Defining Comparisons](#on-defining-comparisons))
 * comp_list: a simple text file listing names of comparisons to be made
 * fqgzglob: a *quoted* (meaning in quotes!) shell-style glob (e.g. 'sample_data/*.gz') which points to ALL of the configuration files.  <mark>**NOTE**</mark>, as detailed in the next section, the input files must follow a naming convention.
 * rrna_glob: a *quoted* glob referring to the bowtie-formatted database of rRNA data used to align NGS data against for filtering/cleaning out rRNA data.
-* gtf_file: path to the GTF file (note, NOT for CRAFT) but for DCC
+* gtf_file: path to the GTF file used by DCC to help aid in gene identification (where relevant), region identification, and the genomic contexts of any found backsplice-junctions (note, NOT for CRAFT)
 * stardb_glob:  a *quoted* glob of STAR-formatted reference data files ; used by STAR for the alignments used by DCC.
-* fa_ref_file: path to the FASTA genome reference file (e.g. hg38.fa)
+* fa_ref_file: path to the FASTA genome reference file used by DCC (same as the source of the indices for STAR)
 * repeat_file: GTF-formatted file of repeats, used by DCC
-* circatlas_bed: circatlas file downloaded from [circatlas](https://ngdc.cncb.ac.cn/circatlas/)
-* kegg_cp_organism_str: either "hsa" (for human) or "mmu" (for mouse)
-* kegg_db: path to a comma-separated values mapping gene symbols to KEGG gene IDs
+* circatlas_bed: circatlas file downloaded from [circatlas](https://ngdc.cncb.ac.cn/circatlas/).  Used by custom scripts in a plotting step to associate CircRNAs found with already known CircularRNAs
+* kegg_cp_organism_str: a string, either "hsa" (for human) or "mmu" (for mouse).  Used by ClusterProfiler
+* kegg_db: path to a comma-separated values mapping gene symbols to KEGG gene IDs, used by ClusterProfiler
 * craft_input_glob_str: a quoted glob to input files for CRAFT (see section below for additional details and a link to the CRAFT page).  Example data is available in [lumacaftor_small_test_data_CRAFT_and_deeptarget_DSL2.tar.gz](https://zenodo.org/records/10449545/files/lumacaftor_small_test_data_CRAFT_and_deeptarget_DSL2.tar.gz)
 * craft_params: a text file giving parametr values for CRAFT (see the section below for details, an example in the downloaded file [lumacaftor_small_test_data_CRAFT_and_deeptarget_DSL2.tar.gz](https://zenodo.org/records/10449545/files/lumacaftor_small_test_data_CRAFT_and_deeptarget_DSL2.tar.gz).
 * craft_ref_path_file: the *basename* of the FA file in the in the reference data for craft, not the one for the BLAST database however.  This might be confusing, please see run_pipe_demo.sh and the exmample downloaded data in [lumacaftor_small_test_data_CRAFT_and_deeptarget_DSL2.tar.gz](https://zenodo.org/records/10449545/files/lumacaftor_small_test_data_CRAFT_and_deeptarget_DSL2.tar.gz).
