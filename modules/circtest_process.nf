@@ -151,7 +151,11 @@ mkdir -v ${PLOTTING_DIR}
 #define the circatlas bed file
 CA_BED="circatlas_bed.txt" ;
 #run plotting
-python3 /usr/local/bin/ct_aug.py !{params.plot_cutoff ? "-PVC "+params.plot_cutoff : ""}  ${COHORT_NAME} ${CA_BED} ${PLOTTING_DIR}/${COHORT_NAME}.merged.tsv ${PLOTTING_DIR} !{cohort_comp_conf} ; 
+python3 /usr/local/bin/ct_aug.py !{params.plot_cutoff ? "-PVC "+params.plot_cutoff : ""} \
+	 ${COHORT_NAME}	\
+	 ${CA_BED}	\
+	 ${PLOTTING_DIR}/${COHORT_NAME}.merged.tsv	\
+	 ${PLOTTING_DIR} !{cohort_comp_conf} ; 
 #zip up results of plotting
 zip -r ${COHORT_NAME}.plotting_results.zip ${PLOTTING_DIR}
 echo "Finished at";
