@@ -33,7 +33,7 @@ Download tests data to this "quick_start_2" directory the test data from Zenodo 
 
 These are referenced *here* and *here* on [Zenodo](https://zenodo.org/ "Zenodo").
 
-The test data here from Zenodo are a subset of a larger dataset used in this [analysis/publication](https://pubmed.ncbi.nlm.nih.gov/37142522/).  The data here are subsetted to cover some circularRNA for the 
+The test data here from Zenodo are a subset of a larger dataset used in this [analysis/publication](https://pubmed.ncbi.nlm.nih.gov/37142522/).  The data here are subsetted to cover some circularRNA for the ATP8B4 gene.
 
 #### 4.   Unpack the test data.
 
