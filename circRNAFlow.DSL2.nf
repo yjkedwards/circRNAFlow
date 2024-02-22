@@ -333,6 +333,10 @@ for ZIP in `find *.zip`; do
 	unzip -d extract_dir/ ${ZIP}	
 done ;
 
+#make tmp directory here for sort's tmpdir
+mkdir -v tmp
+export TMPDIR=${PWD}/tmp/
+
 #subset to find the circRNAs
 # columns are chrom, start, stop, gene, strand
 cut -f 1,2,3,4,6 `find extract_dir -iname "*.tsv"` |grep -Pv '^Chr'|sort|uniq|tr "\t" "," > circRNA_list.txt ;
