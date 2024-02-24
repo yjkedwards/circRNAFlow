@@ -339,7 +339,17 @@ export TMPDIR=${PWD}/tmp/
 
 #subset to find the circRNAs
 # columns are chrom, start, stop, gene, strand
-cut -f 1,2,3,4,6 `find extract_dir -iname "*.tsv"` |grep -Pv '^Chr'|sort|uniq|tr "\t" "," > circRNA_list.txt ;
+# use craft_top_cutoff param to get top N results (after sort by sig_p and sig_p cutoff) ; if not provided use default value
+CRAFT_TOP_CUTOFF=!{params.craft_top_cutoff ? params.craft_top_cutoff : "30"} 
+cut -f 1,2,3,4,6,9  `find extract_dir -iname "*.tsv"` 							|  	\
+	grep -Pv '^Chr' 										|  	\
+	sort -k6g 											|  	\
+	awk '{if($6<=!{params.craft_padj_cutoff ? params.craft_padj_cutoff : "1.0"}) { print $0 }}' 	|	\
+	cut -f 1,2,3,4,5 										|	\
+	sort												|	\
+	uniq												|	\
+	head --lines=${CRAFT_TOP_CUTOFF} 								|	\
+	tr "\\t" "," > circRNA_list.txt ;
 
 #setup the list_backsplice files
 mkdir -v backsplice_gene_name_dir
