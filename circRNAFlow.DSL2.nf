@@ -390,6 +390,8 @@ done ;
 
 process run_craft {
 
+errorStrategy 'ignore'
+
 input:
 	//circrna data
 	each path('data.zip')
@@ -490,7 +492,7 @@ zip -r ${ZIP_NAME} ${ZIP_DIR}
 process deepTarget {
 
 errorStrategy 'retry'
-maxRetries '2'
+maxRetries '10'
 
 
 input:
@@ -635,27 +637,27 @@ workflow {
 	//5) run circtest (here use multiple combinations of thresholds in the non-plain version)
 	raw_circtest_results_by_cohort=circtest(
 		cohort_channel, 				//cohort name (e.g. case/control)
-		circtest_staging,				//the actual DCC output LinearCount,CircRNACount,CircCoordinates)
-		channel.fromPath(params.cohort_comp_conf),	//comparison configuration for sample/cohort membership
+		circtest_staging.first(),				//the actual DCC output LinearCount,CircRNACount,CircCoordinates)
+		channel.fromPath(params.cohort_comp_conf).first(),	//comparison configuration for sample/cohort membership
 		"")
 	//circtest plain uses default circtest settings
 	raw_circtest_results_by_cohort_plain=circtest_plain(
 		cohort_channel,
-		circtest_staging,
-		channel.fromPath(params.cohort_comp_conf),
+		circtest_staging.first(),
+		channel.fromPath(params.cohort_comp_conf).first(),
 		"plain")
 
 	//6) run plotting
 	plotting_results=circtest_plotting(
 		raw_circtest_results_by_cohort,			//output from circtest
-		channel.fromPath(params.circatlas_bed),		//circatlas BED file for acquiring circatlas data
-		channel.fromPath(params.cohort_comp_conf))	//cohort comparison information
+		channel.fromPath(params.circatlas_bed).first(),		//circatlas BED file for acquiring circatlas data
+		channel.fromPath(params.cohort_comp_conf).first())	//cohort comparison information
 
 	//run plotting plain
 	circtest_plain_plotting(
 		raw_circtest_results_by_cohort_plain,
-		channel.fromPath(params.circatlas_bed),
-		channel.fromPath(params.cohort_comp_conf))
+		channel.fromPath(params.circatlas_bed).first(),
+		channel.fromPath(params.cohort_comp_conf).first())
 
 	//7) run cluster profiler
 	run_cluster_profiler(plotting_results,channel.fromPath(params.kegg_db))
